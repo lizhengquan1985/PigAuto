@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PigRun", "PigRun\PigRun.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PigApi", "PigApi\PigApi.csproj", "{8017D918-1785-42DE-9A17-F5D35E7BDDEB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{0B9C4FCD-002E-4E4D-A35D-22046834CD29}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{8017D918-1785-42DE-9A17-F5D35E7BDDEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8017D918-1785-42DE-9A17-F5D35E7BDDEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8017D918-1785-42DE-9A17-F5D35E7BDDEB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B9C4FCD-002E-4E4D-A35D-22046834CD29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B9C4FCD-002E-4E4D-A35D-22046834CD29}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B9C4FCD-002E-4E4D-A35D-22046834CD29}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B9C4FCD-002E-4E4D-A35D-22046834CD29}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
