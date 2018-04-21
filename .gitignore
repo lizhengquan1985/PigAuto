@@ -11,3 +11,8 @@
 /MorePig/packages
 /MorePig/Test/bin/Debug
 /MorePig/Test/obj/Debug
+/MorePig/PigPlatform/bin/Debug
+/MorePig/PigApi/bin/Debug
+/MorePig/PigAccount/bin/Debug
+/MorePig/PigService/bin/Debug
+/MorePig/PigRun/bin/Debug

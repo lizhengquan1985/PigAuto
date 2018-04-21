@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PigService
 {
-    public class PigEmptyDao : BaseDo
+    public class PigEmptyDao : BaseDao
     {
     }
 }
