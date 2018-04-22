@@ -48,5 +48,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PigPlatform\PigPlatform.csproj">
+      <Project>{c8869f2e-e048-42a0-8d99-71c5bc2b9729}</Project>
+      <Name>PigPlatform</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

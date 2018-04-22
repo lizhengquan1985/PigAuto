@@ -50,6 +50,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\PigAccount\PigAccount.csproj">
+      <Project>{82c294ea-bc97-4b9f-b0b5-17a9849df604}</Project>
+      <Name>PigAccount</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PigPlatform\PigPlatform.csproj">
       <Project>{c8869f2e-e048-42a0-8d99-71c5bc2b9729}</Project>
       <Name>PigPlatform</Name>

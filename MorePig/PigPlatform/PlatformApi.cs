@@ -39,15 +39,9 @@ namespace PigPlatform
         private readonly string SECRET_KEY = string.Empty;
         #endregion
 
-        #region HuoBiApi接口地址
-        private const string API_ACCOUNBT_BALANCE = "/v1/account/accounts/{0}/balance";
-        private const string API_ACCOUNBT_ALL = "/v1/account/accounts";
-        private const string API_ORDERS_PLACE = "/v1/order/orders/place";
-        #endregion
-
         #region 构造函数
         private RestClient client;//http请求客户端
-        public PlatformApi(string accessKey, string secretKey, string huobi_host = "api.huobi.pro")
+        public PlatformApi(string accessKey, string secretKey, string huobi_host = "api.huobipro.com")
         {
             ACCESS_KEY = accessKey;
             SECRET_KEY = secretKey;
@@ -65,7 +59,24 @@ namespace PigPlatform
         }
         #endregion
 
-        #region HuoBiApi方法
+        #region 接口地址
+        private const string API_ACCOUNBT_BALANCE = "/v1/account/accounts/{0}/balance";
+        private const string API_ACCOUNBT_ALL = "/v1/account/accounts";
+        private const string API_ORDERS_PLACE = "/v1/order/orders/place";
+        #endregion
+
+        #region 公共接口
+        private const string API_COMMON_CURRENCYS = "/v1/common/currencys";
+        private const string API_COMMON_SYMBOLS = "/v1/common/symbols";
+
+        public List<string> GetCommonCurrencys()
+        {
+            var result = SendRequestNoSignature<List<string>>(API_COMMON_CURRENCYS);
+            return result.Data;
+        }
+        #endregion
+
+        #region Api方法
         public List<Account> GetAllAccount()
         {
             var result = SendRequest<List<Account>>(API_ACCOUNBT_ALL);
@@ -79,7 +90,25 @@ namespace PigPlatform
         }
         #endregion
 
-        #region HTTP请求方法
+        #region HTTP请求方法， 不需要签名
+
+        private HBResponse<T> SendRequestNoSignature<T>(string resourcePath, string parameters = "") where T : new()
+        {
+            parameters = UriEncodeParameterValue(parameters);//请求参数
+            var url = $"{HUOBI_HOST_URL}{resourcePath}";
+            if (!string.IsNullOrEmpty(parameters))
+            {
+                url += $"?{parameters}";
+            }
+            Console.WriteLine(url);
+            var request = new RestRequest(url, Method.GET);
+            var result = client.Execute<HBResponse<T>>(request);
+            return result.Data;
+        }
+
+        #endregion
+
+        #region HTTP请求方法， 需要签名
         /// <summary>
         /// 发起Http请求
         /// </summary>
@@ -131,6 +160,11 @@ namespace PigPlatform
         /// <returns></returns>
         private string UriEncodeParameterValue(string parameters)
         {
+            if (string.IsNullOrEmpty(parameters))
+            {
+                return string.Empty;
+            }
+
             var sb = new StringBuilder();
             var paraArray = parameters.Split('&');
             var sortDic = new SortedDictionary<string, string>();
