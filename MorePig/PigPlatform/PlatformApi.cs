@@ -74,9 +74,19 @@ namespace PigPlatform
             var result = SendRequestNoSignature<List<string>>(API_COMMON_CURRENCYS);
             return result.Data;
         }
+
+        public List<CommonSymbols> GetCommonSymbols()
+        {
+            var result = SendRequestNoSignature<List<CommonSymbols>>(API_COMMON_SYMBOLS);
+            return result.Data;
+        }
+
         #endregion
 
-        #region Api方法
+        #region 基本接口
+        #endregion
+
+        #region 账户接口
         public List<Account> GetAllAccount()
         {
             var result = SendRequest<List<Account>>(API_ACCOUNBT_ALL);
@@ -247,7 +257,5 @@ namespace PigPlatform
             return UrlEncode(sign);
         }
         #endregion
-
-
     }
 }
