@@ -13,16 +13,16 @@ namespace PigRun
     {
         static ILog logger = LogManager.GetLogger(typeof(CoinAnalyze));
 
-        public static List<FlexPoint> Analyze(List<HistoryKline> data, out decimal lastLow, out decimal nowOpen, decimal flexPercent)
+        public static List<FlexPoint> Analyze(List<HistoryKline> data, out decimal lastLowPrice, out decimal nowPrice, decimal flexPercent)
         {
-            nowOpen = 0;
-            lastLow = 999999999;
+            nowPrice = 0; //现在的价格
+            lastLowPrice = 999999999;
 
             try
             {
                 Console.WriteLine($"总数：{data.Count}");
 
-                nowOpen = data[0].Open;
+                nowPrice = data[0].Close;
 
                 List<FlexPoint> flexPointList = new List<FlexPoint>();
 
@@ -73,11 +73,11 @@ namespace PigRun
                 if (flexPointList.Count != 0 && flexPointList[0].isHigh)
                 {
                     // 
-                    foreach (var item in res.data)
+                    foreach (var item in data)
                     {
-                        if (item.id < flexPointList[0].id && lastLow > item.open)
+                        if (item.Id < flexPointList[0].id && lastLowPrice > item.Open)
                         {
-                            lastLow = item.open;
+                            lastLowPrice = item.Open;
                         }
                     }
                 }
