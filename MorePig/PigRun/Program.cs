@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using PigPlatform;
+using PigPlatform.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,10 +41,24 @@ namespace PigRun
                 }
             });
 
+            // 不停的对每个币做操作
+            foreach (var symbol in symbols)
+            {
+                RunCoin(symbol);
+            }
+
             while (true)
             {
                 Console.ReadLine();
             }
+        }
+
+        public static void RunCoin(CommonSymbols symbol)
+        {
+            Task.Run(() =>
+            {
+                // 分析币
+            });
         }
     }
 }
