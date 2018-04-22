@@ -42,6 +42,16 @@ namespace PigPlatform
 
         #region 构造函数
         private RestClient client;//http请求客户端
+        public PlatformApi(string huobi_host = "api.huobipro.com")
+        {
+            HUOBI_HOST = huobi_host;
+            HUOBI_HOST_URL = "https://" + HUOBI_HOST;
+            if (string.IsNullOrEmpty(HUOBI_HOST))
+                throw new ArgumentException("HUOBI_HOST  Cannt Be Null Or Empty");
+            client = new RestClient(HUOBI_HOST_URL);
+            client.AddDefaultHeader("Content-Type", "application/json");
+            client.AddDefaultHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36");
+        }
         public PlatformApi(string accessKey, string secretKey, string huobi_host = "api.huobipro.com")
         {
             ACCESS_KEY = accessKey;

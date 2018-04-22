@@ -23,5 +23,10 @@ namespace PigPlatform.Model
 
         [JsonProperty(PropertyName = "symbol-partition")]
         public string SymbolPartition { get; set; }
+
+        /// <summary>
+        /// 最小购买数量， api不返回， 自己加上去
+        /// </summary>
+        public decimal LeastBuyQuantity { get; set; }
     }
 }
