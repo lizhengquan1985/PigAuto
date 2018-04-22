@@ -1,4 +1,5 @@
-﻿using PigPlatform.Model;
+﻿using Newtonsoft.Json;
+using PigPlatform.Model;
 using RestSharp;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ namespace PigPlatform
 {
     public class PlatformApi
     {
-        #region HuoBiApi配置信息
+        #region Api配置信息
         /// <summary>
         /// API域名名称
         /// </summary>
@@ -60,9 +61,6 @@ namespace PigPlatform
         #endregion
 
         #region 接口地址
-        private const string API_ACCOUNBT_BALANCE = "/v1/account/accounts/{0}/balance";
-        private const string API_ACCOUNBT_ALL = "/v1/account/accounts";
-        private const string API_ORDERS_PLACE = "/v1/order/orders/place";
         #endregion
 
         #region 公共接口
@@ -84,9 +82,21 @@ namespace PigPlatform
         #endregion
 
         #region 基本接口
+
+        private const string API_MARKET_HISTORY_KLINE = "/market/history/kline";
+        public List<HistoryKline> GetHistoryKline(string symbol, string period, int size = 1440)
+        {
+            var parameters = $"symbol={symbol}&period={period}&size={size}";
+            var result = SendRequestNoSignature<List<HistoryKline>>(API_MARKET_HISTORY_KLINE, parameters);
+            return result.Data;
+        }
+
         #endregion
 
         #region 账户接口
+        private const string API_ACCOUNBT_BALANCE = "/v1/account/accounts/{0}/balance";
+        private const string API_ACCOUNBT_ALL = "/v1/account/accounts";
+        private const string API_ORDERS_PLACE = "/v1/order/orders/place";
         public List<Account> GetAllAccount()
         {
             var result = SendRequest<List<Account>>(API_ACCOUNBT_ALL);
@@ -112,8 +122,8 @@ namespace PigPlatform
             }
             Console.WriteLine(url);
             var request = new RestRequest(url, Method.GET);
-            var result = client.Execute<HBResponse<T>>(request);
-            return result.Data;
+            var result = client.Execute(request);
+            return JsonConvert.DeserializeObject<HBResponse<T>>(result.Content);
         }
 
         #endregion

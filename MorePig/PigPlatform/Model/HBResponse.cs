@@ -9,6 +9,8 @@ namespace PigPlatform.Model
     public class HBResponse<T> where T : new()
     {
         public string Status { get; set; }
+        //public string Ch { get; set; }
+        //public long Ts { get; set; }
         public T Data { get; set; }
     }
 }
