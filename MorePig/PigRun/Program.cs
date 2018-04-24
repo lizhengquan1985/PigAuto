@@ -29,7 +29,7 @@ namespace PigRun
                         {
                             var period = "1min";
                             var klines = api.GetHistoryKline(symbol.BaseCurrency + symbol.QuoteCurrency, "1min");
-                            var key = symbol.BaseCurrency + "-" + period + "-" + DateTime.Now.ToString("yyyyMMddHHmm");
+                            var key = HistoryKlinePools.GetKey(symbol, period);
                             HistoryKlinePools.Init(key, klines);
                             Console.WriteLine(DateTime.Now);
                         }
@@ -44,7 +44,7 @@ namespace PigRun
             // 不停的对每个币做操作
             foreach (var symbol in symbols)
             {
-                RunCoin(symbol);
+                RunCoin(symbol, api);
             }
 
             while (true)
@@ -53,10 +53,21 @@ namespace PigRun
             }
         }
 
-        public static void RunCoin(CommonSymbols symbol)
+        public static void RunCoin(CommonSymbols symbol, PlatformApi api)
         {
             Task.Run(() =>
             {
+                while (true)
+                {
+                    try
+                    {
+                        CoinTrade.Run(symbol, api);
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
+                }
                 // 分析币 按flex 从大到小排。
                 // 计算整体是否跌
                 // 计算是否快速升高，以及是否快速降低。

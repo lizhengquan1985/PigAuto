@@ -15,6 +15,11 @@ namespace PigRun
         /// </summary>
         private static ConcurrentDictionary<string, List<HistoryKline>> historyKlines = new ConcurrentDictionary<string, List<HistoryKline>>();
 
+        public static string GetKey(CommonSymbols symbol, string period)
+        {
+            return symbol.BaseCurrency + "-" + period + "-" + DateTime.Now.ToString("yyyyMMddHHmm");
+        }
+
         public static void Init(string key, List<HistoryKline> data)
         {
             historyKlines.TryAdd(key, data);
