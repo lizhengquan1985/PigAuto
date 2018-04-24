@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using log4net;
+using Newtonsoft.Json;
 using PigPlatform;
 using PigPlatform.Model;
 using System;
@@ -11,8 +12,12 @@ namespace PigRun
 {
     class Program
     {
+        static ILog logger = LogManager.GetLogger(typeof(Program));
+
         static void Main(string[] args)
         {
+            logger.Info("----------------------  begin  --------------------------------");
+
             CoinUtils.Init();
             PlatformApi api = new PlatformApi();
             var symbols = CoinUtils.GetAllCommonSymbols();
@@ -65,7 +70,7 @@ namespace PigRun
                     }
                     catch (Exception ex)
                     {
-
+                        logger.Error(ex.Message, ex);
                     }
                 }
                 // 分析币 按flex 从大到小排。

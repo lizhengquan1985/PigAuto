@@ -53,6 +53,7 @@
     <Compile Include="Coins.cs" />
     <Compile Include="DataTypes.cs" />
     <Compile Include="Model\Account.cs" />
+    <Compile Include="Model\AccountBalance.cs" />
     <Compile Include="Model\CommonSymbols.cs" />
     <Compile Include="Model\HBResponse.cs" />
     <Compile Include="Model\HistoryKline.cs" />

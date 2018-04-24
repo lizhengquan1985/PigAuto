@@ -49,8 +49,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CoinAnalyze.cs" />
+    <Compile Include="CoinTrade.cs" />
     <Compile Include="FlexPoint.cs" />
     <Compile Include="HistoryKlinePools.cs" />
+    <Compile Include="JudgeBuyUtils.cs" />
+    <Compile Include="JudgeSellUtils.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -59,6 +62,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\PigAccount\PigAccount.csproj">
+      <Project>{82c294ea-bc97-4b9f-b0b5-17a9849df604}</Project>
+      <Name>PigAccount</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PigPlatform\PigPlatform.csproj">
       <Project>{c8869f2e-e048-42a0-8d99-71c5bc2b9729}</Project>
       <Name>PigPlatform</Name>

@@ -107,6 +107,13 @@ namespace PigPlatform
         private const string API_ACCOUNBT_BALANCE = "/v1/account/accounts/{0}/balance";
         private const string API_ACCOUNBT_ALL = "/v1/account/accounts";
         private const string API_ORDERS_PLACE = "/v1/order/orders/place";
+
+        public AccountBalance GetAccountBalance(string accountId)
+        {
+            var result = SendRequest<AccountBalance>(string.Format(API_ACCOUNBT_BALANCE, accountId));
+            return result.Data;
+        }
+
         public List<Account> GetAllAccount()
         {
             var result = SendRequest<List<Account>>(API_ACCOUNBT_ALL);

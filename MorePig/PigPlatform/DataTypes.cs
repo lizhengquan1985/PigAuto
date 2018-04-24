@@ -83,32 +83,4 @@ namespace PigPlatform
         public string source { get; set; }
     }
 
-    public class AccountBalance
-    {
-        public string status { get; set; }
-        public AccountBalanceData data { get; set; }
-    }
-
-    public class AccountBalanceData
-    {
-        public long id { get; set; }
-        public string type { get; set; }
-        public string state { get; set; }
-        public List<AccountBalanceItem> list { get; set; }
-    }
-
-    public class AccountBalanceItem
-    {
-        public string currency { get; set; }
-        public decimal balance { get; set; }
-        public string type { get; set; }
-    }
-
-    public enum CalcPriceHuiluo
-    {
-        littlest,
-        little,
-        high,
-        highest,
-    }
 }
