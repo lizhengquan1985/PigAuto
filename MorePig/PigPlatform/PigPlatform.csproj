@@ -57,6 +57,8 @@
     <Compile Include="Model\CommonSymbols.cs" />
     <Compile Include="Model\HBResponse.cs" />
     <Compile Include="Model\HistoryKline.cs" />
+    <Compile Include="Model\OrderDetail.cs" />
+    <Compile Include="Model\OrderMatchResult.cs" />
     <Compile Include="Model\OrderPlaceRequest.cs" />
     <Compile Include="PlatformApi.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

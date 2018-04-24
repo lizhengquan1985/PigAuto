@@ -60,7 +60,7 @@ namespace PigRun
             }
 
             var accountInfo = api.GetAccountBalance(accountId);
-            var usdt = accountInfo.data.list.Find(it => it.currency == "usdt");
+            var usdt = accountInfo.Data.list.Find(it => it.currency == "usdt");
             decimal recommendAmount = usdt.balance / 600; // TODO 测试阶段，暂定低一些，
             Console.Write($"spot--------> 开始 {symbol.QuoteCurrency}  推荐额度：{decimal.Round(recommendAmount, 2)} ");
 
@@ -107,8 +107,17 @@ namespace PigRun
                 decimal buyQuantity = recommendAmount / nowPrice;
                 buyQuantity = decimal.Round(buyQuantity, GetBuyQuantityPrecisionNumber(coin));
                 decimal orderPrice = decimal.Round(nowPrice * (decimal)1.005, getPrecisionNumber(coin));
-                ResponseOrder order = new AccountOrder().NewOrderBuy(accountId, buyQuantity, orderPrice, null, symbol.QuoteCurrency, symbol.BaseCurrency);
-                if (order.status != "error")
+
+                OrderPlaceRequest req = new OrderPlaceRequest();
+                req.account_id = accountId;
+                req.amount = buyQuantity.ToString();
+                req.price = orderPrice.ToString();
+                req.source = "api";
+                req.symbol = "ethusdt";
+                req.type = "buy-limit";
+                var result = api.OrderPlace(req);
+                HBResponse<long> order = api.OrderPlace(req);
+                if (order.Status == "ok")
                 {
                     new PigMoreDao().CreatePigMore(new PigMore()
                     {
@@ -129,9 +138,8 @@ namespace PigRun
                         SOrderId = "",
                         SOrderResult = ""
                     });
-                    ClearData();
                     // 下单成功马上去查一次
-                    QueryDetailAndUpdate(order.data);
+                    QueryDetailAndUpdate(order.Data);
                 }
                 else
                 {
@@ -200,39 +208,39 @@ namespace PigRun
             }
         }
 
-        private static void QueryDetailAndUpdate(string orderId)
+        private static void QueryDetailAndUpdate(long orderId, PlatformApi api)
         {
             string orderQuery = "";
-            var queryOrder = new AccountOrder().QueryOrder(orderId, out orderQuery);
-            if (queryOrder.status == "ok" && queryOrder.data.state == "filled")
+            var queryOrder = api.QueryOrderDetail(orderId);
+            if (queryOrder.Status == "ok" && queryOrder.Data.state == "filled")
             {
                 string orderDetail = "";
-                var detail = new AccountOrder().QueryDetail(orderId, out orderDetail);
+                var matchResult = api.QueryOrderMatchResult(orderId);
                 decimal maxPrice = 0;
-                foreach (var item in detail.data)
+                foreach (var item in matchResult.Data)
                 {
                     if (maxPrice < item.price)
                     {
                         maxPrice = item.price;
                     }
                 }
-                if (detail.status == "ok")
+                if (matchResult.Status == "ok")
                 {
-                    new CoinDao().UpdateTradeRecordBuySuccess(orderId, maxPrice, orderQuery);
+                    new PigMoreDao().UpdatePigMoreBuySuccess(orderId, maxPrice, orderQuery);
                 }
             }
         }
 
-        private static void QuerySellDetailAndUpdate(string orderId)
+        private static void QuerySellDetailAndUpdate(long orderId, PlatformApi api)
         {
             string orderQuery = "";
-            var queryOrder = new AccountOrder().QueryOrder(orderId, out orderQuery);
-            if (queryOrder.status == "ok" && queryOrder.data.state == "filled")
+            var queryOrder = api.QueryOrderDetail(orderId);
+            if (queryOrder.Status == "ok" && queryOrder.Data.state == "filled")
             {
                 string orderDetail = "";
-                var detail = new AccountOrder().QueryDetail(orderId, out orderDetail);
+                var detail = api.QueryOrderMatchResult(orderId);
                 decimal minPrice = 99999999;
-                foreach (var item in detail.data)
+                foreach (var item in detail.Data)
                 {
                     if (minPrice > item.price)
                     {
@@ -240,7 +248,7 @@ namespace PigRun
                     }
                 }
                 // 完成
-                new CoinDao().UpdateTradeRecordSellSuccess(orderId, minPrice, orderQuery);
+                new PigMoreDao().UpdateTradeRecordSellSuccess(orderId, minPrice, orderQuery);
             }
         }
     }

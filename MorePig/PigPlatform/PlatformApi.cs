@@ -107,11 +107,18 @@ namespace PigPlatform
         private const string API_ACCOUNBT_BALANCE = "/v1/account/accounts/{0}/balance";
         private const string API_ACCOUNBT_ALL = "/v1/account/accounts";
         private const string API_ORDERS_PLACE = "/v1/order/orders/place";
+        private const string API_ORDER_DETAIL = "/v1/order/orders/{0}";
+        private const string API_ORDER_MATCH_RESULT = "/v1/order/orders/{0}/matchresults";
 
-        public AccountBalance GetAccountBalance(string accountId)
+        /// <summary>
+        /// 查询账户
+        /// </summary>
+        /// <param name="accountId"></param>
+        /// <returns></returns>
+        public HBResponse<AccountBalance> GetAccountBalance(string accountId)
         {
             var result = SendRequest<AccountBalance>(string.Format(API_ACCOUNBT_BALANCE, accountId));
-            return result.Data;
+            return result;
         }
 
         public List<Account> GetAllAccount()
@@ -119,6 +126,24 @@ namespace PigPlatform
             var result = SendRequest<List<Account>>(API_ACCOUNBT_ALL);
             return result.Data;
         }
+
+        public HBResponse<OrderDetail> QueryOrderDetail(long data)
+        {
+            var result = SendRequest<OrderDetail>(string.Format(API_ORDER_DETAIL, data));
+            return result;
+        }
+
+        public HBResponse<List<OrderMatchResult>> QueryOrderMatchResult(long data)
+        {
+            var result = SendRequest<List<OrderMatchResult>>(string.Format(API_ORDER_MATCH_RESULT, data));
+            return result;
+        }
+
+        /// <summary>
+        /// 下单
+        /// </summary>
+        /// <param name="req"></param>
+        /// <returns></returns>
         public HBResponse<long> OrderPlace(OrderPlaceRequest req)
         {
             var bodyParas = new Dictionary<string, string>();

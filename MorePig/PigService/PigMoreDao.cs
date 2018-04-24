@@ -30,7 +30,7 @@ namespace PigService
             }
         }
 
-        public void UpdatePigMoreBuySuccess(string buyOrderId, decimal buyTradePrice, string buyOrderQuery)
+        public void UpdatePigMoreBuySuccess(long buyOrderId, decimal buyTradePrice, string buyOrderQuery)
         {
             using (var tx = Database.BeginTransaction())
             {
@@ -107,7 +107,7 @@ namespace PigService
             }
         }
 
-        public void UpdateTradeRecordSellSuccess(string sellOrderId, decimal sellTradePrice, string sellOrderQuery)
+        public void UpdateTradeRecordSellSuccess(long sellOrderId, decimal sellTradePrice, string sellOrderQuery)
         {
             using (var tx = Database.BeginTransaction())
             {

@@ -48,30 +48,7 @@ namespace PigPlatform
         public string status { get; set; }
         public string data { get; set; }
     }
-
-    public class ResponseQueryOrder
-    {
-        public string status { get; set; }
-        public OrderData data { get; set; }
-    }
-
-    public class OrderData
-    {
-        public string id { get; set; }
-        // 如 gntusdt
-        public string symbol { get; set; }
-        public decimal amount { get; set; }
-        public decimal price { get; set; }
-        public string type { get; set; }
-        public string state { get; set; }
-        public string source { get; set; }
-    }
-
-    public class ResponseOrderDetail
-    {
-        public string status { get; set; }
-        public List<OrderDetailData> data { get; set; }
-    }
+     
 
     public class OrderDetailData
     {

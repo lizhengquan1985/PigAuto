@@ -8,12 +8,6 @@ namespace PigPlatform.Model
 {
     public class AccountBalance
     {
-        public string status { get; set; }
-        public AccountBalanceData data { get; set; }
-    }
-
-    public class AccountBalanceData
-    {
         public long id { get; set; }
         public string type { get; set; }
         public string state { get; set; }
