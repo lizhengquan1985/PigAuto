@@ -9,17 +9,29 @@ namespace PigPlatform.Model
 {
     public class CommonSymbols
     {
+        /// <summary>
+        /// 如u-s-d-t
+        /// </summary>
         [JsonProperty(PropertyName = "base-currency")]
         public string BaseCurrency { get; set; }
 
+        /// <summary>
+        /// 如 e-t-h
+        /// </summary>
         [JsonProperty(PropertyName = "quote-currency")]
         public string QuoteCurrency { get; set; }
 
+        /// <summary>
+        /// 价格精度
+        /// </summary>
         [JsonProperty(PropertyName = "price-precision")]
-        public string PricePrecision { get; set; }
+        public int PricePrecision { get; set; }
 
+        /// <summary>
+        /// 数量精度
+        /// </summary>
         [JsonProperty(PropertyName = "amount-precision")]
-        public string AmountPrecision { get; set; }
+        public int AmountPrecision { get; set; }
 
         [JsonProperty(PropertyName = "symbol-partition")]
         public string SymbolPartition { get; set; }

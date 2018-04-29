@@ -1,4 +1,7 @@
-﻿using System;
+﻿using log4net;
+using PigPlatform.Model;
+using PigService;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +11,8 @@ namespace PigRun
 {
     public class JudgeSellUtils
     {
+        static ILog logger = LogManager.GetLogger(typeof(JudgeSellUtils));
+
         public static bool CheckCanSell(decimal buyPrice, decimal nearHigherOpen, decimal nowOpen, decimal gaoyuPercentSell = (decimal)1.03, bool needHuitou = true)
         {
             //item.BuyPrice, higher, itemNowOpen
@@ -30,6 +35,45 @@ namespace PigRun
             }
 
             return false;
+        }
+
+        public static decimal AnalyzeNeedSell(decimal comparePrice, DateTime compareDate, string coin, string toCoin, out decimal nowOpen, List<HistoryKline> data)
+        {
+            // 当前open
+            nowOpen = 0;
+
+            decimal higher = new decimal(0);
+
+            try
+            {
+                nowOpen = data[0].Open;
+
+                List<FlexPoint> flexPointList = new List<FlexPoint>();
+
+                decimal openHigh = data[0].Open;
+                decimal openLow = data[0].Open;
+                long idHigh = 0;
+                long idLow = 0;
+                int lastHighOrLow = 0; // 1 high, -1: low
+                foreach (var item in data)
+                {
+                    if (Utils.GetDateById(item.Id) < compareDate)
+                    {
+                        continue;
+                    }
+
+                    if (item.Open > higher)
+                    {
+                        higher = item.Open;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex.Message, ex);
+                Console.WriteLine("1111111111111111111111 over  " + ex.Message);
+            }
+            return higher;
         }
     }
 }

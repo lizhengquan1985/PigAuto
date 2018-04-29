@@ -64,7 +64,6 @@ namespace PigRun
             decimal recommendAmount = usdt.balance / 600; // TODO 测试阶段，暂定低一些，
             Console.Write($"spot--------> 开始 {symbol.QuoteCurrency}  推荐额度：{decimal.Round(recommendAmount, 2)} ");
 
-
             //try
             //{
             //    // 查询出结果还没好的数据， 去搜索一下
@@ -94,7 +93,6 @@ namespace PigRun
             //    logger.Error(ex.Message, ex);
             //}
 
-
             // 获取最近的购买记录
             // 购买的要求
             // 1. 最近一次是低点， 并且有上升的迹象。
@@ -102,11 +100,12 @@ namespace PigRun
             // 3. 如果flexpoint 小于等于1.02，则只能考虑买少一点。
             // 4. 余额要足够，推荐购买的额度要大于0.3
             // 5. 
-            if (!flexPointList[0].isHigh && recommendAmount > (decimal)0.3  &&  !JudgeBuyUtils.IsQuickRise(symbol.QuoteCurrency, historyKlines) && JudgeBuyUtils.CheckCalcMaxhuoluo())
+            if (!flexPointList[0].isHigh && recommendAmount > (decimal)0.3 && !JudgeBuyUtils.IsQuickRise(symbol.QuoteCurrency, historyKlines) && JudgeBuyUtils.CheckCalcMaxhuoluo())
             {
                 decimal buyQuantity = recommendAmount / nowPrice;
-                buyQuantity = decimal.Round(buyQuantity, GetBuyQuantityPrecisionNumber(coin));
-                decimal orderPrice = decimal.Round(nowPrice * (decimal)1.005, getPrecisionNumber(coin));
+
+                buyQuantity = decimal.Round(buyQuantity, symbol.AmountPrecision);
+                decimal orderPrice = decimal.Round(nowPrice * (decimal)1.005, symbol.PricePrecision);
 
                 OrderPlaceRequest req = new OrderPlaceRequest();
                 req.account_id = accountId;
@@ -122,24 +121,37 @@ namespace PigRun
                     new PigMoreDao().CreatePigMore(new PigMore()
                     {
                         Name = symbol.QuoteCurrency,
+                        AccountId = accountId,
                         UserName = AccountConfig.userName,
+                        FlexPercent = flexPercent,
+
                         BQuantity = buyQuantity,
                         BOrderP = orderPrice,
                         BDate = DateTime.Now,
-                        HasSell = false,
                         BOrderResult = JsonConvert.SerializeObject(order),
-                        BAnalyze = JsonConvert.SerializeObject(flexPointList),
-                        AccountId = accountId,
-                        BState = "",
+                        BState = StateConst.PreSubmitted,
                         BTradeP = 0,
-                        BOrderId = order.data,
-                        BOrderQ = "",
-                        SAnalyze = "",
+                        BOrderId = order.Data,
+                        BFlex = "",
+                        BMemo = "",
+                        BOrderDetail = "",
+                        BOrderMatchResults = "",
+
+                        HasSell = false,
                         SOrderId = "",
-                        SOrderResult = ""
+                        SOrderResult = "",
+                        SDate = DateTime.MinValue,
+                        SFlex = "",
+                        SMemo = "",
+                        SOrderDetail = "",
+                        SOrderMatchResults = "",
+                        SOrderP = 0,
+                        SQuantity = 0,
+                        SState = "",
+                        STradeP = 0,
                     });
                     // 下单成功马上去查一次
-                    QueryDetailAndUpdate(order.Data);
+                    QueryDetailAndUpdate(order.Data, api);
                 }
                 else
                 {
@@ -149,21 +161,21 @@ namespace PigRun
             }
 
             {
-                var needSellList = new PigMoreDao().ListBuySuccessAndNoSellRecord(accountId, coin, 0);
-                SpotRecord last = null;
-                foreach (var item in needSellList)
-                {
-                    if (last == null || item.BuyDate > last.BuyDate)
-                    {
-                        last = item;
-                    }
-                }
+                var needSellPigMoreList = new PigMoreDao().ListPigMore(accountId, symbol.QuoteCurrency, new List<string>() { StateConst.PartialCanceled, StateConst.Filled });
+                //SpotRecord last = null;
+                //foreach (var item in needSellList)
+                //{
+                //    if (last == null || item.BuyDate > last.BuyDate)
+                //    {
+                //        last = item;
+                //    }
+                //}
 
-                foreach (var item in needSellList)
+                foreach (var needSellPigMoreItem in needSellPigMoreList)
                 {
                     // 分析是否 大于
                     decimal itemNowOpen = 0;
-                    decimal higher = new CoinAnalyze().AnalyzeNeedSell(item.BuyOrderPrice, item.BuyDate, coin, "usdt", out itemNowOpen, res);
+                    decimal higher = JudgeSellUtils.AnalyzeNeedSell(needSellPigMoreItem.BOrderP, needSellPigMoreItem.BDate, symbol.QuoteCurrency, symbol.BaseCurrency, out itemNowOpen, historyKlines);
 
                     decimal gaoyuPercentSell = (decimal)1.035;
 
@@ -178,31 +190,37 @@ namespace PigRun
                         }
                     }
 
-                    var canSell = JudgeSellUtils.CheckCanSell(item.BOrderP, higher, itemNowOpen, gaoyuPercentSell, needHuitou);
+                    var canSell = JudgeSellUtils.CheckCanSell(needSellPigMoreItem.BOrderP, higher, itemNowOpen, gaoyuPercentSell, needHuitou);
 
                     if (canSell)
                     {
-                        decimal sellQuantity = item.BQuantity * (decimal)0.99;
-                        sellQuantity = decimal.Round(sellQuantity, getSellPrecisionNumber(coin));
-                        if (coin == "xrp" && sellQuantity < 1)
+                        decimal sellQuantity = needSellPigMoreItem.BQuantity * (decimal)0.99;
+                        sellQuantity = decimal.Round(sellQuantity, symbol.AmountPrecision);
+                        if (symbol.BaseCurrency == "xrp" && sellQuantity < 1)
                         {
                             sellQuantity = 1;
                         }
                         // 出售
-                        decimal sellPrice = decimal.Round(itemNowOpen * (decimal)0.985, getPrecisionNumber(coin));
-                        ResponseOrder order = new AccountOrder().NewOrderSell(accountId, sellQuantity, sellPrice, null, coin, "usdt");
-                        if (order.status != "error")
+                        decimal sellPrice = decimal.Round(itemNowOpen * (decimal)0.985, symbol.PricePrecision);
+                        OrderPlaceRequest req = new OrderPlaceRequest();
+                        req.account_id = accountId;
+                        req.amount = sellQuantity.ToString();
+                        req.price = sellPrice.ToString();
+                        req.source = "api";
+                        req.symbol = "ethusdt";
+                        req.type = "sell-limit";
+                        HBResponse<long> order = api.OrderPlace(req);
+                        if (order.Status == "ok")
                         {
-                            new CoinDao().ChangeDataWhenSell(item.Id, sellQuantity, sellPrice, JsonConvert.SerializeObject(order), JsonConvert.SerializeObject(flexPointList), order.data);
+                            new PigMoreDao().ChangeDataWhenSell(needSellPigMoreItem.Id, sellQuantity, sellPrice, JsonConvert.SerializeObject(order), JsonConvert.SerializeObject(flexPointList), order.Data);
                             // 下单成功马上去查一次
-                            QuerySellDetailAndUpdate(order.data);
+                            QuerySellDetailAndUpdate(order.Data, api);
                         }
                         else
                         {
-                            logger.Error($"出售结果 coin{coin} accountId:{accountId}  出售数量{sellQuantity} itemNowOpen{itemNowOpen} higher{higher} {JsonConvert.SerializeObject(order)}");
+                            logger.Error($"出售结果 coin{symbol.QuoteCurrency} accountId:{accountId}  出售数量{sellQuantity} itemNowOpen{itemNowOpen} higher{higher} {JsonConvert.SerializeObject(order)}");
                             logger.Error($"出售结果 分析 {JsonConvert.SerializeObject(flexPointList)}");
                         }
-                        ClearData();
                     }
                 }
             }

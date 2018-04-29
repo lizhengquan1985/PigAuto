@@ -31,12 +31,23 @@ namespace PigService
         public string SFlex { get; set; }
         public string BMemo { get; set; }
         public string SMemo { get; set; }
-        public string BOrderId { get; set; }
+        public long BOrderId { get; set; }
         public string BOrderDetail { get; set; }
         public string BOrderMatchResults { get; set; }
         public string SOrderId { get; set; }
         public string SOrderDetail { get; set; }
         public string SOrderMatchResults { get; set; }
         public decimal FlexPercent { get; set; }
+    }
+
+    public class StateConst
+    { 
+        public const string PreSubmitted = "pre-submitted"; // 准备提交,
+        public const string Submitting = "submitting"; //
+        public const string Submitted = "submitted"; // 已提交
+        public const string PartialFilled = "partial-filled"; // 部分成交
+        public const string PartialCanceled = "partial-canceled"; // 部分成交撤销
+        public const string Filled = "filled"; // 完全成交
+        public const string Canceled = "canceled"; // 已撤销
     }
 }

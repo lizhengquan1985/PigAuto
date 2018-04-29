@@ -76,9 +76,18 @@ namespace PigService
             return Database.Query<PigMore>(sql).ToList();
         }
 
-        public List<PigMore> ListBuySuccessAndNoSellRecord(string accountId, string coin, int celue)
+        public List<PigMore> ListPigMore(string accountId, string coin, List<string> stateList)
         {
-            var sql = $"select * from t_spot_record where AccountId='{accountId}' and Coin = '{coin}' and HasSell=0 and BuySuccess=1 and UserName='{AccountConfig.userName}' and celuo={celue}";
+            var states = "";
+            stateList.ForEach(it =>
+            {
+                if (states != "")
+                {
+                    states += ",";
+                }
+                states += $"'{it}'";
+            });
+            var sql = $"select * from t_pig_more where AccountId='{accountId}' and Coin = '{coin}' and HasSell=0 and BState in({states}) and UserName='{AccountConfig.userName}'";
             return Database.Query<PigMore>(sql).ToList();
         }
 
