@@ -1,5 +1,7 @@
 ﻿using MySql.Data.MySqlClient;
+using Newtonsoft.Json;
 using PigAccount;
+using PigPlatform.Model;
 using SharpDapper;
 using SharpDapper.Extensions;
 using System;
@@ -21,6 +23,8 @@ namespace PigService
             }
         }
 
+        #region 先查找出需要查询购买或者出售结果的记录， 然后查询结果，最后修改数据库记录
+
         /// <summary>
         /// 列出需要改变购买状态的记录
         /// </summary>
@@ -33,6 +37,10 @@ namespace PigService
             return Database.Query<PigMore>(sql).ToList();
         }
 
+        /// <summary>
+        /// 列出需要改变出售状态的
+        /// </summary>
+        /// <returns></returns>
         public List<PigMore> ListNeedChangeSellStatePigMore()
         {
             var states = $"'{StateConst.PartialFilled}','{StateConst.Filled}'";
@@ -40,16 +48,27 @@ namespace PigService
             return Database.Query<PigMore>(sql).ToList();
         }
 
-        public void UpdatePigMoreBuySuccess(long buyOrderId, decimal buyTradePrice, string buyOrderQuery)
+        public void UpdatePigMoreBuySuccess(long buyOrderId, HBResponse<OrderDetail> orderDetail, HBResponse<List<OrderMatchResult>> orderMatchResult, decimal buyTradePrice)
         {
             using (var tx = Database.BeginTransaction())
             {
-                var sql = $"update t_spot_record set BuyOrderQuery='{buyOrderQuery}', BuySuccess=1 , BuyTradePrice={buyTradePrice} where BuyOrderId ='{buyOrderId}'";
+                var sql = $"update t_pig_more set BTradeP={buyTradePrice}, BState='{orderDetail.Data.state}' ,BOrderDetail='{JsonConvert.SerializeObject(orderDetail)}', BOrderMatchResults='{JsonConvert.SerializeObject(orderMatchResult)}' where BOrderId ='{buyOrderId}'";
                 Database.Execute(sql);
                 tx.Commit();
             }
         }
 
+        public void UpdateTradeRecordSellSuccess(long sellOrderId, HBResponse<OrderDetail> orderDetail, HBResponse<List<OrderMatchResult>> orderMatchResult, decimal sellTradePrice)
+        {
+            using (var tx = Database.BeginTransaction())
+            {
+                var sql = $"update t_spot_record set STradeP={sellTradePrice}, SState='{orderDetail.Data.state}' ,SOrderDetail='{JsonConvert.SerializeObject(orderDetail)}', SOrderMatchResults='{JsonConvert.SerializeObject(orderMatchResult)}' where SOrderId ='{sellOrderId}'";
+                Database.Execute(sql);
+                tx.Commit();
+            }
+        }
+
+        #endregion
 
         /// <summary>
         /// 获取没有出售的数量
@@ -110,16 +129,6 @@ namespace PigService
             using (var tx = Database.BeginTransaction())
             {
                 var sql = $"update t_spot_record set HasSell=1, SellTotalQuantity={sellTotalQuantity}, sellOrderPrice={sellOrderPrice}, SellDate=now(), SellAnalyze='{sellAnalyze}', SellOrderResult='{sellOrderResult}',SellOrderId={sellOrderId} where Id = {id}";
-                Database.Execute(sql);
-                tx.Commit();
-            }
-        }
-
-        public void UpdateTradeRecordSellSuccess(long sellOrderId, decimal sellTradePrice, string sellOrderQuery)
-        {
-            using (var tx = Database.BeginTransaction())
-            {
-                var sql = $"update t_spot_record set SellOrderQuery='{sellOrderQuery}', SellSuccess=1 , SellTradePrice={sellTradePrice} where SellOrderId ='{sellOrderId}'";
                 Database.Execute(sql);
                 tx.Commit();
             }

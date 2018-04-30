@@ -36,6 +36,9 @@
     <Reference Include="MySql.Data, Version=8.0.11.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
       <HintPath>..\packages\MySql.Data.8.0.11\lib\net452\MySql.Data.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="SharpDapper">
       <HintPath>..\..\libs\SharpDapper.dll</HintPath>
     </Reference>
@@ -68,6 +71,10 @@
     <ProjectReference Include="..\PigAccount\PigAccount.csproj">
       <Project>{82c294ea-bc97-4b9f-b0b5-17a9849df604}</Project>
       <Name>PigAccount</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PigPlatform\PigPlatform.csproj">
+      <Project>{c8869f2e-e048-42a0-8d99-71c5bc2b9729}</Project>
+      <Name>PigPlatform</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -183,11 +183,9 @@ namespace PigRun
 
         private static void QueryBuyDetailAndUpdate(long orderId, PlatformApi api)
         {
-            string orderQuery = "";
-            var queryOrder = api.QueryOrderDetail(orderId);
-            if (queryOrder.Status == "ok" && queryOrder.Data.state == "filled")
+            var orderDetail = api.QueryOrderDetail(orderId);
+            if (orderDetail.Status == "ok" && orderDetail.Data.state == "filled")
             {
-                string orderDetail = "";
                 var matchResult = api.QueryOrderMatchResult(orderId);
                 decimal maxPrice = 0;
                 foreach (var item in matchResult.Data)
@@ -199,7 +197,7 @@ namespace PigRun
                 }
                 if (matchResult.Status == "ok")
                 {
-                    new PigMoreDao().UpdatePigMoreBuySuccess(orderId, maxPrice, orderQuery);
+                    new PigMoreDao().UpdatePigMoreBuySuccess(orderId, orderDetail, matchResult, maxPrice);
                 }
             }
         }
@@ -271,14 +269,12 @@ namespace PigRun
 
         private static void QuerySellDetailAndUpdate(long orderId, PlatformApi api)
         {
-            string orderQuery = "";
-            var queryOrder = api.QueryOrderDetail(orderId);
-            if (queryOrder.Status == "ok" && queryOrder.Data.state == "filled")
+            var orderDetail = api.QueryOrderDetail(orderId);
+            if (orderDetail.Status == "ok" && orderDetail.Data.state == "filled")
             {
-                string orderDetail = "";
-                var detail = api.QueryOrderMatchResult(orderId);
+                var orderMatchResult = api.QueryOrderMatchResult(orderId);
                 decimal minPrice = 99999999;
-                foreach (var item in detail.Data)
+                foreach (var item in orderMatchResult.Data)
                 {
                     if (minPrice > item.price)
                     {
@@ -286,7 +282,7 @@ namespace PigRun
                     }
                 }
                 // 完成
-                new PigMoreDao().UpdateTradeRecordSellSuccess(orderId, minPrice, orderQuery);
+                new PigMoreDao().UpdateTradeRecordSellSuccess(orderId, orderDetail, orderMatchResult, minPrice);
             }
         }
 
@@ -298,6 +294,10 @@ namespace PigRun
                 foreach (var item in needChangeBuyStatePigMoreList)
                 {
                     // 如果长时间没有购买成功， 则取消订单。
+                    if(item.BDate < DateTime.Now.AddMinutes(-30))
+                    {
+                        //api.
+                    }
                     // TODO
                     QueryBuyDetailAndUpdate(item.BOrderId, api);
                 }

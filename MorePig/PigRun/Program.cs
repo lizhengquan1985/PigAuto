@@ -30,7 +30,8 @@ namespace PigRun
             CoinUtils.Init();
             Console.WriteLine(JsonConvert.SerializeObject(CoinUtils.GetAllCommonSymbols()));
             // TODO 最小购买数量
-            PlatformApi api = new PlatformApi();
+            PlatformApi.Init(AccountConfig.accessKey, AccountConfig.secretKey);
+            PlatformApi api = PlatformApi.GetInstance();
             var symbols = CoinUtils.GetAllCommonSymbols();
 
             // 定时任务， 不停的获取最新数据， 以供分析使用
@@ -68,7 +69,7 @@ namespace PigRun
                 {
                     try
                     {
-                        //CoinTrade.CheckBuyOrSellState(api);
+                        CoinTrade.CheckBuyOrSellState(api);
                     }
                     catch (Exception ex)
                     {

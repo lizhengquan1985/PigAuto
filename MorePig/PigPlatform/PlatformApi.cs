@@ -70,6 +70,24 @@ namespace PigPlatform
         }
         #endregion
 
+        #region 单例模式
+
+        private static PlatformApi api = null;
+        public static void Init(string accessKey, string secretKey, string huobi_host = "api.huobipro.com")
+        {
+            if(api == null)
+            {
+                api = new PlatformApi(accessKey, secretKey, huobi_host);
+            }
+        }
+
+        public static PlatformApi GetInstance()
+        {
+            return api;
+        }
+
+        #endregion
+
         #region 接口地址
         #endregion
 
