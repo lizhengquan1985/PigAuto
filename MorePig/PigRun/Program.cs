@@ -33,7 +33,7 @@ namespace PigRun
                         try
                         {
                             var period = "1min";
-                            var klines = api.GetHistoryKline(symbol.BaseCurrency + symbol.QuoteCurrency, "1min");
+                            var klines = api.GetHistoryKline(symbol.QuoteCurrency + symbol.BaseCurrency, "1min");
                             var key = HistoryKlinePools.GetKey(symbol, period);
                             HistoryKlinePools.Init(key, klines);
                             Console.WriteLine(DateTime.Now);
@@ -52,13 +52,29 @@ namespace PigRun
                 RunCoin(symbol, api);
             }
 
+            Task.Run(() =>
+            {
+                while (true)
+                {
+                    try
+                    {
+
+                        CoinTrade.CheckBuyOrSellState();
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.Error("查看购买以及出售结果" + ex.Message, ex);
+                    }
+                }
+            });
+
             while (true)
             {
                 Console.ReadLine();
             }
         }
 
-        public static void RunCoin(CommonSymbols symbol, PlatformApi api)
+        private static void RunCoin(CommonSymbols symbol, PlatformApi api)
         {
             Task.Run(() =>
             {

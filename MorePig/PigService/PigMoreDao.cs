@@ -12,15 +12,6 @@ namespace PigService
 {
     public class PigMoreDao : BaseDao
     {
-        public PigMoreDao()
-        {
-            string connectionString = AccountConfig.sqlConfig;
-            var connection = new MySqlConnection(connectionString);
-            Database = new DapperConnection(connection);
-
-        }
-        protected IDapperConnection Database { get; private set; }
-
         public void CreatePigMore(PigMore pigMore)
         {
             using (var tx = Database.BeginTransaction())
@@ -28,6 +19,25 @@ namespace PigService
                 Database.Insert(pigMore);
                 tx.Commit();
             }
+        }
+
+        /// <summary>
+        /// 列出需要改变购买状态的记录
+        /// </summary>
+        /// <param name="accountId"></param>
+        /// <returns></returns>
+        public List<PigMore> ListNeedChangeBuyStatePigMore(string accountId)
+        {
+            var states = $"'{StateConst.PartialFilled}','{StateConst.Filled}'";
+            var sql = $"select * from t_pig_more where AccountId='{accountId}' and BState not in({states}) and UserName='{AccountConfig.userName}'";
+            return Database.Query<PigMore>(sql).ToList();
+        }
+
+        public List<PigMore> ListNeedChangeSellStatePigMore(string accountId)
+        {
+            var states = $"'{StateConst.PartialFilled}','{StateConst.Filled}'";
+            var sql = $"select * from t_pig_more where AccountId='{accountId}' and SState not in({states}) and UserName='{AccountConfig.userName}'";
+            return Database.Query<PigMore>(sql).ToList();
         }
 
         public void UpdatePigMoreBuySuccess(long buyOrderId, decimal buyTradePrice, string buyOrderQuery)
@@ -40,17 +50,6 @@ namespace PigService
             }
         }
 
-        public List<PigMore> ListNotSetBuySuccess(string accountId, string coin)
-        {
-            var sql = $"select * from t_spot_record where AccountId='{accountId}' and Coin = '{coin}' and BuySuccess=0 and UserName='{AccountConfig.userName}'";
-            return Database.Query<PigMore>(sql).ToList();
-        }
-
-        public List<PigMore> ListHasSellNotSetSellSuccess(string accountId, string coin)
-        {
-            var sql = $"select * from t_spot_record where AccountId='{accountId}' and Coin = '{coin}' and SellSuccess=0 and HasSell=1 and UserName='{AccountConfig.userName}'";
-            return Database.Query<PigMore>(sql).ToList();
-        }
 
         /// <summary>
         /// 获取没有出售的数量

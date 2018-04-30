@@ -34,7 +34,7 @@ namespace PigService
         public long BOrderId { get; set; }
         public string BOrderDetail { get; set; }
         public string BOrderMatchResults { get; set; }
-        public string SOrderId { get; set; }
+        public long SOrderId { get; set; }
         public string SOrderDetail { get; set; }
         public string SOrderMatchResults { get; set; }
         public decimal FlexPercent { get; set; }

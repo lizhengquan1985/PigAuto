@@ -59,39 +59,18 @@ namespace PigRun
                 return;
             }
 
+            // 计算是否适合购买
+            RunBuy(accountId, flexPercent, flexPointList, api);
+            // 计算是否适合出售
+            RunSell(flexPercent, flexPointList);
+        }
+
+        private static void RunBuy(string accountId, decimal flexPercent, List<FlexPoint> flexPointList, PlatformApi api)
+        {
             var accountInfo = api.GetAccountBalance(accountId);
             var usdt = accountInfo.Data.list.Find(it => it.currency == "usdt");
             decimal recommendAmount = usdt.balance / 600; // TODO 测试阶段，暂定低一些，
             Console.Write($"spot--------> 开始 {symbol.QuoteCurrency}  推荐额度：{decimal.Round(recommendAmount, 2)} ");
-
-            //try
-            //{
-            //    // 查询出结果还没好的数据， 去搜索一下
-            //    var noSetBuySuccess = new CoinDao().ListNotSetBuySuccess(accountId, coin);
-            //    foreach (var item in noSetBuySuccess)
-            //    {
-            //        QueryDetailAndUpdate(item.BuyOrderId);
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    logger.Error(ex.Message, ex);
-            //}
-
-            //try
-            //{
-            //    // 查询出结果还没好的数据， 去搜索一下
-            //    var noSetSellSuccess = new CoinDao().ListHasSellNotSetSellSuccess(accountId, coin);
-            //    foreach (var item in noSetSellSuccess)
-            //    {
-            //        Console.WriteLine("----------> " + JsonConvert.SerializeObject(item));
-            //        QuerySellDetailAndUpdate(item.SellOrderId);
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    logger.Error(ex.Message, ex);
-            //}
 
             // 获取最近的购买记录
             // 购买的要求
@@ -151,7 +130,7 @@ namespace PigRun
                         STradeP = 0,
                     });
                     // 下单成功马上去查一次
-                    QueryDetailAndUpdate(order.Data, api);
+                    QueryBuyDetailAndUpdate(order.Data, api);
                 }
                 else
                 {
@@ -159,17 +138,36 @@ namespace PigRun
                     logger.Error($"下单结果 分析 {JsonConvert.SerializeObject(flexPointList)}");
                 }
             }
+        }
 
+        private static void QueryBuyDetailAndUpdate(long orderId, PlatformApi api)
+        {
+            string orderQuery = "";
+            var queryOrder = api.QueryOrderDetail(orderId);
+            if (queryOrder.Status == "ok" && queryOrder.Data.state == "filled")
+            {
+                string orderDetail = "";
+                var matchResult = api.QueryOrderMatchResult(orderId);
+                decimal maxPrice = 0;
+                foreach (var item in matchResult.Data)
+                {
+                    if (maxPrice < item.price)
+                    {
+                        maxPrice = item.price;
+                    }
+                }
+                if (matchResult.Status == "ok")
+                {
+                    new PigMoreDao().UpdatePigMoreBuySuccess(orderId, maxPrice, orderQuery);
+                }
+            }
+        }
+
+        private static void RunSell(decimal flexPercent, List<FlexPoint> flexPointList)
+        {
+            if (flexPointList[0].isHigh)
             {
                 var needSellPigMoreList = new PigMoreDao().ListPigMore(accountId, symbol.QuoteCurrency, new List<string>() { StateConst.PartialCanceled, StateConst.Filled });
-                //SpotRecord last = null;
-                //foreach (var item in needSellList)
-                //{
-                //    if (last == null || item.BuyDate > last.BuyDate)
-                //    {
-                //        last = item;
-                //    }
-                //}
 
                 foreach (var needSellPigMoreItem in needSellPigMoreList)
                 {
@@ -183,7 +181,7 @@ namespace PigRun
                     if (flexPercent < (decimal)1.04)
                     {
                         gaoyuPercentSell = (decimal)1.035;
-                        if (flexPointList.Count <= 2 && last.BuyDate < DateTime.Now.AddDays(-1))
+                        if (flexPointList.Count <= 2 && needSellPigMoreList.Where(it => it.BDate > DateTime.Now.AddDays(-1)).ToList().Count == 0)
                         {
                             // 1天都没有交易. 并且波动比较小. 则不需要回头
                             needHuitou = false;
@@ -226,29 +224,6 @@ namespace PigRun
             }
         }
 
-        private static void QueryDetailAndUpdate(long orderId, PlatformApi api)
-        {
-            string orderQuery = "";
-            var queryOrder = api.QueryOrderDetail(orderId);
-            if (queryOrder.Status == "ok" && queryOrder.Data.state == "filled")
-            {
-                string orderDetail = "";
-                var matchResult = api.QueryOrderMatchResult(orderId);
-                decimal maxPrice = 0;
-                foreach (var item in matchResult.Data)
-                {
-                    if (maxPrice < item.price)
-                    {
-                        maxPrice = item.price;
-                    }
-                }
-                if (matchResult.Status == "ok")
-                {
-                    new PigMoreDao().UpdatePigMoreBuySuccess(orderId, maxPrice, orderQuery);
-                }
-            }
-        }
-
         private static void QuerySellDetailAndUpdate(long orderId, PlatformApi api)
         {
             string orderQuery = "";
@@ -267,6 +242,39 @@ namespace PigRun
                 }
                 // 完成
                 new PigMoreDao().UpdateTradeRecordSellSuccess(orderId, minPrice, orderQuery);
+            }
+        }
+
+        public static void CheckBuyOrSellState(string accountId, PlatformApi api)
+        {
+            try
+            {
+                var needChangeBuyStatePigMoreList = new PigMoreDao().ListNeedChangeBuyStatePigMore(accountId);
+                foreach (var item in needChangeBuyStatePigMoreList)
+                {
+                    // 如果长时间没有购买成功， 则取消订单。
+                    // TODO
+                    QueryBuyDetailAndUpdate(item.BOrderId, api);
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex.Message, ex);
+            }
+
+            try
+            {
+                var needChangeSellStatePigMoreList = new PigMoreDao().ListNeedChangeSellStatePigMore(accountId);
+                foreach (var item in needChangeSellStatePigMoreList)
+                {
+                    // 如果长时间没有出售成功， 则取消订单。
+                    // TODO
+                    QuerySellDetailAndUpdate(item.SOrderId, api);
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex.Message, ex);
             }
         }
     }
