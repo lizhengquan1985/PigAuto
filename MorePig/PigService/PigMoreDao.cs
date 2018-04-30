@@ -14,6 +14,10 @@ namespace PigService
 {
     public class PigMoreDao : BaseDao
     {
+        public PigMoreDao():base()
+        {
+        }
+
         public void CreatePigMore(PigMore pigMore)
         {
             using (var tx = Database.BeginTransaction())

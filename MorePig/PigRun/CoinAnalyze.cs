@@ -20,7 +20,7 @@ namespace PigRun
 
             try
             {
-                Console.WriteLine($"总数：{data.Count}");
+                //Console.WriteLine($"总数：{data.Count}");
 
                 nowPrice = data[0].Close;
 

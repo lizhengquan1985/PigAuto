@@ -43,6 +43,11 @@ namespace PigRun
             var accountId = AccountConfig.mainAccountId;
             var key = HistoryKlinePools.GetKey(symbol, "1min");
             var historyKlines = HistoryKlinePools.Get(key);
+            if (historyKlines == null || historyKlines.Count == 0)
+            {
+                Console.WriteLine($"RunBuy 数据还未准备好：{JsonConvert.SerializeObject(symbol)}");
+                return;
+            }
 
             // 获取最近行情
             decimal lastLowPrice;
@@ -105,7 +110,7 @@ namespace PigRun
                         minBuyPrice = item.BOrderP;
                     }
                 });
-                if(!canBuy || nowPrice * (decimal)1.03 > minBuyPrice)
+                if (!canBuy || nowPrice * (decimal)1.03 > minBuyPrice)
                 {
                     return;
                 }
@@ -121,8 +126,10 @@ namespace PigRun
                 req.source = "api";
                 req.symbol = "ethusdt";
                 req.type = "buy-limit";
-                var result = api.OrderPlace(req);
+                //var result = api.OrderPlace(req);
+                Console.WriteLine($"开始下单, {JsonConvert.SerializeObject(req)}");
                 HBResponse<long> order = api.OrderPlace(req);
+                Console.WriteLine($"下单结果, {JsonConvert.SerializeObject(order)}");
                 if (order.Status == "ok")
                 {
                     new PigMoreDao().CreatePigMore(new PigMore()
@@ -193,6 +200,11 @@ namespace PigRun
             var accountId = AccountConfig.mainAccountId;
             var key = HistoryKlinePools.GetKey(symbol, "1min");
             var historyKlines = HistoryKlinePools.Get(key);
+            if (historyKlines == null || historyKlines.Count == 0)
+            {
+                Console.WriteLine($"RunSell 数据还未准备好：{JsonConvert.SerializeObject(symbol)}");
+                return;
+            }
 
             // 获取最近行情
             decimal lastLowPrice;

@@ -180,7 +180,7 @@ namespace PigPlatform
             {
                 url += $"?{parameters}";
             }
-            Console.WriteLine(url);
+            //Console.WriteLine(url);
             var request = new RestRequest(url, Method.GET);
             var result = client.Execute(request);
             return JsonConvert.DeserializeObject<HBResponse<T>>(result.Content);
@@ -203,7 +203,7 @@ namespace PigPlatform
             parameters += $"&Signature={sign}";
 
             var url = $"{HUOBI_HOST_URL}{resourcePath}?{parameters}";
-            Console.WriteLine(url);
+            //Console.WriteLine(url);
             var request = new RestRequest(url, Method.GET);
             var result = client.Execute<HBResponse<T>>(request);
             return result.Data;
@@ -215,7 +215,7 @@ namespace PigPlatform
             parameters += $"&Signature={sign}";
 
             var url = $"{HUOBI_HOST_URL}{resourcePath}?{parameters}";
-            Console.WriteLine(url);
+            //Console.WriteLine(url);
             var request = new RestRequest(url, Method.POST);
             request.AddJsonBody(postParameters);
             foreach (var item in request.Parameters)
