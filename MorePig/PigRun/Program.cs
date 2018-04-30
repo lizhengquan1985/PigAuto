@@ -1,5 +1,6 @@
 ﻿using log4net;
 using Newtonsoft.Json;
+using PigAccount;
 using PigPlatform;
 using PigPlatform.Model;
 using System;
@@ -17,11 +18,21 @@ namespace PigRun
         static void Main(string[] args)
         {
             logger.Info("----------------------  begin  --------------------------------");
+            Console.WriteLine("请输入角色");
+            var userName = Console.ReadLine();
+            while(userName != "qq" || userName != "xx")
+            {
+                userName = Console.ReadLine();
+                AccountConfig.init(userName);
+            }
 
+            // 初始化
             CoinUtils.Init();
+            Console.WriteLine(JsonConvert.SerializeObject(CoinUtils.GetAllCommonSymbols()));
+
             PlatformApi api = new PlatformApi();
             var symbols = CoinUtils.GetAllCommonSymbols();
-            symbols = symbols.FindAll(it => it.QuoteCurrency == "usdt");
+            symbols = symbols.FindAll(it => it.BaseCurrency == "usdt");
 
             // 定时任务， 不停的获取最新数据， 以供分析使用
             Task.Run(() =>
