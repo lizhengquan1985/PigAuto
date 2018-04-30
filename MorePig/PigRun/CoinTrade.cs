@@ -224,8 +224,8 @@ namespace PigRun
                 foreach (var needSellPigMoreItem in needSellPigMoreList)
                 {
                     // 分析是否 大于
-                    decimal itemNowOpen = 0;
-                    decimal higher = JudgeSellUtils.AnalyzeNeedSell(needSellPigMoreItem.BOrderP, needSellPigMoreItem.BDate, symbol.QuoteCurrency, symbol.BaseCurrency, out itemNowOpen, historyKlines);
+                    decimal itemNowPrice = 0;
+                    decimal higher = JudgeSellUtils.AnalyzeNeedSell(needSellPigMoreItem.BOrderP, needSellPigMoreItem.BDate, symbol.BaseCurrency, symbol.QuoteCurrency, out itemNowPrice, historyKlines);
 
                     decimal gaoyuPercentSell = (decimal)1.035;
 
@@ -240,7 +240,7 @@ namespace PigRun
                         }
                     }
 
-                    var canSell = JudgeSellUtils.CheckCanSell(needSellPigMoreItem.BOrderP, higher, itemNowOpen, gaoyuPercentSell, needHuitou);
+                    var canSell = JudgeSellUtils.CheckCanSell(needSellPigMoreItem.BOrderP, higher, itemNowPrice, gaoyuPercentSell, needHuitou);
 
                     if (canSell)
                     {
