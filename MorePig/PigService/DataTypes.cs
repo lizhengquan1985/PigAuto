@@ -13,7 +13,6 @@ namespace PigService
         public long Id { get; set; }
         public string Name { get; set; }
         public string AccountId { get; set; }
-        public bool HasSell { get; set; }
         public string UserName { get; set; }
         public decimal BQuantity { get; set; }
         public decimal BOrderP { get; set; }

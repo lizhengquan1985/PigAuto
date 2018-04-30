@@ -18,51 +18,24 @@ namespace PigRun
 
         public static void Run(CommonSymbols symbol, PlatformApi api)
         {
-            var accountId = AccountConfig.mainAccountId;
-            var key = HistoryKlinePools.GetKey(symbol, "1min");
-            var historyKlines = HistoryKlinePools.Get(key);
-
-            // 获取最近行情
-            decimal lastLowPrice;
-            decimal nowPrice;
-            // 分析是否下跌， 下跌超过一定数据，可以考虑
-            decimal flexPercent = (decimal)1.04;
-            var flexPointList = CoinAnalyze.Analyze(historyKlines, out lastLowPrice, out nowPrice, flexPercent);
-            if (flexPointList == null || flexPointList.Count == 0 || (flexPointList.Count == 1 && flexPointList[0].isHigh))
+            try
             {
-                flexPercent = (decimal)1.035;
-                flexPointList = CoinAnalyze.Analyze(historyKlines, out lastLowPrice, out nowPrice, flexPercent);
+                // 计算是否适合购买
+                RunBuy(symbol, api);
             }
-            if (flexPointList == null || flexPointList.Count == 0 || (flexPointList.Count == 1 && flexPointList[0].isHigh))
+            catch (Exception ex)
             {
-                flexPercent = (decimal)1.03;
-                flexPointList = CoinAnalyze.Analyze(historyKlines, out lastLowPrice, out nowPrice, flexPercent);
+                logger.Error("---> 购买异常: " + ex.Message, ex);
             }
-            if (flexPointList == null || flexPointList.Count == 0 || (flexPointList.Count == 1 && flexPointList[0].isHigh))
+            try
             {
-                flexPercent = (decimal)1.025;
-                flexPointList = CoinAnalyze.Analyze(historyKlines, out lastLowPrice, out nowPrice, flexPercent);
+                // 计算是否适合出售
+                RunSell(symbol, api);
             }
-            if (flexPointList == null || flexPointList.Count == 0 || (flexPointList.Count == 1 && flexPointList[0].isHigh))
+            catch (Exception ex)
             {
-                flexPercent = (decimal)1.02;
-                flexPointList = CoinAnalyze.Analyze(historyKlines, out lastLowPrice, out nowPrice, flexPercent);
+                logger.Error("---> 出售异常: " + ex.Message, ex);
             }
-            if (flexPointList == null || flexPointList.Count == 0 || (flexPointList.Count == 1 && flexPointList[0].isHigh))
-            {
-                flexPercent = (decimal)1.015;
-                flexPointList = CoinAnalyze.Analyze(historyKlines, out lastLowPrice, out nowPrice, flexPercent);
-            }
-            if (flexPointList.Count == 0 && flexPointList.Count == 0)
-            {
-                logger.Error($"--------------> 分析{symbol.BaseCurrency}的flexPoint结果数量为0 ");
-                return;
-            }
-
-            // 计算是否适合购买
-            RunBuy(symbol, api);
-            // 计算是否适合出售
-            RunSell(flexPercent, flexPointList, symbol, api);
         }
 
         private static void RunBuy(CommonSymbols symbol, PlatformApi api)
@@ -111,7 +84,7 @@ namespace PigRun
             var accountInfo = api.GetAccountBalance(accountId);
             var usdt = accountInfo.Data.list.Find(it => it.currency == "usdt");
             decimal recommendAmount = usdt.balance / 600; // TODO 测试阶段，暂定低一些，
-            Console.Write($"spot--------> 开始 {symbol.QuoteCurrency}  推荐额度：{decimal.Round(recommendAmount, 2)} ");
+            Console.Write($"spot--------> 开始 {symbol.BaseCurrency}  推荐额度：{decimal.Round(recommendAmount, 2)} ");
 
             // 获取最近的购买记录
             // 购买的要求
@@ -140,7 +113,7 @@ namespace PigRun
                 {
                     new PigMoreDao().CreatePigMore(new PigMore()
                     {
-                        Name = symbol.QuoteCurrency,
+                        Name = symbol.BaseCurrency,
                         AccountId = accountId,
                         UserName = AccountConfig.userName,
                         FlexPercent = flexPercent,
@@ -152,12 +125,11 @@ namespace PigRun
                         BState = StateConst.PreSubmitted,
                         BTradeP = 0,
                         BOrderId = order.Data,
-                        BFlex = "",
+                        BFlex = JsonConvert.SerializeObject(flexPointList),
                         BMemo = "",
                         BOrderDetail = "",
                         BOrderMatchResults = "",
 
-                        HasSell = false,
                         SOrderId = 0,
                         SOrderResult = "",
                         SDate = DateTime.MinValue,
@@ -175,7 +147,7 @@ namespace PigRun
                 }
                 else
                 {
-                    logger.Error($"下单结果 coin{symbol.QuoteCurrency} accountId:{accountId}  购买数量{buyQuantity} nowOpen{nowPrice} {JsonConvert.SerializeObject(order)}");
+                    logger.Error($"下单结果 coin{symbol.BaseCurrency} accountId:{accountId}  购买数量{buyQuantity} nowOpen{nowPrice} {JsonConvert.SerializeObject(order)}");
                     logger.Error($"下单结果 分析 {JsonConvert.SerializeObject(flexPointList)}");
                 }
             }
@@ -202,11 +174,48 @@ namespace PigRun
             }
         }
 
-        private static void RunSell(decimal flexPercent, List<FlexPoint> flexPointList,CommonSymbols symbol, PlatformApi api)
+        private static void RunSell(CommonSymbols symbol, PlatformApi api)
         {
             var accountId = AccountConfig.mainAccountId;
             var key = HistoryKlinePools.GetKey(symbol, "1min");
             var historyKlines = HistoryKlinePools.Get(key);
+
+            // 获取最近行情
+            decimal lastLowPrice;
+            decimal nowPrice;
+            // 分析是否下跌， 下跌超过一定数据，可以考虑
+            decimal flexPercent = (decimal)1.04;
+            var flexPointList = CoinAnalyze.Analyze(historyKlines, out lastLowPrice, out nowPrice, flexPercent);
+            if (flexPointList == null || flexPointList.Count == 0 || (flexPointList.Count == 1 && flexPointList[0].isHigh))
+            {
+                flexPercent = (decimal)1.035;
+                flexPointList = CoinAnalyze.Analyze(historyKlines, out lastLowPrice, out nowPrice, flexPercent);
+            }
+            if (flexPointList == null || flexPointList.Count == 0 || (flexPointList.Count == 1 && flexPointList[0].isHigh))
+            {
+                flexPercent = (decimal)1.03;
+                flexPointList = CoinAnalyze.Analyze(historyKlines, out lastLowPrice, out nowPrice, flexPercent);
+            }
+            if (flexPointList == null || flexPointList.Count == 0 || (flexPointList.Count == 1 && flexPointList[0].isHigh))
+            {
+                flexPercent = (decimal)1.025;
+                flexPointList = CoinAnalyze.Analyze(historyKlines, out lastLowPrice, out nowPrice, flexPercent);
+            }
+            if (flexPointList == null || flexPointList.Count == 0 || (flexPointList.Count == 1 && flexPointList[0].isHigh))
+            {
+                flexPercent = (decimal)1.02;
+                flexPointList = CoinAnalyze.Analyze(historyKlines, out lastLowPrice, out nowPrice, flexPercent);
+            }
+            if (flexPointList == null || flexPointList.Count == 0 || (flexPointList.Count == 1 && flexPointList[0].isHigh))
+            {
+                flexPercent = (decimal)1.015;
+                flexPointList = CoinAnalyze.Analyze(historyKlines, out lastLowPrice, out nowPrice, flexPercent);
+            }
+            if (flexPointList.Count == 0 && flexPointList.Count == 0)
+            {
+                logger.Error($"--------------> 分析{symbol.BaseCurrency}的flexPoint结果数量为0 ");
+                return;
+            }
 
             if (flexPointList[0].isHigh)
             {
@@ -294,7 +303,7 @@ namespace PigRun
                 foreach (var item in needChangeBuyStatePigMoreList)
                 {
                     // 如果长时间没有购买成功， 则取消订单。
-                    if(item.BDate < DateTime.Now.AddMinutes(-30))
+                    if (item.BDate < DateTime.Now.AddMinutes(-30))
                     {
                         //api.
                     }

@@ -60,7 +60,7 @@ namespace PigRun
             // 不停的对每个币做操作
             foreach (var symbol in symbols)
             {
-                //RunCoin(symbol, api);
+                RunCoin(symbol, api);
             }
 
             Task.Run(() =>
@@ -90,14 +90,7 @@ namespace PigRun
             {
                 while (true)
                 {
-                    try
-                    {
-                        CoinTrade.Run(symbol, api);
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.Error(ex.Message, ex);
-                    }
+                    CoinTrade.Run(symbol, api);
                 }
                 // 分析币 按flex 从大到小排。
                 // 计算整体是否跌
