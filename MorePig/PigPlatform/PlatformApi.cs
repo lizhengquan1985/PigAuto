@@ -94,7 +94,7 @@ namespace PigPlatform
         #region 基本接口
 
         private const string API_MARKET_HISTORY_KLINE = "/market/history/kline";
-        public List<HistoryKline> GetHistoryKline(string symbol, string period, int size = 1440)
+        public List<HistoryKline> GetHistoryKline(string symbol, string period, int size = 1000)
         {
             var parameters = $"symbol={symbol}&period={period}&size={size}";
             var result = SendRequestNoSignature<List<HistoryKline>>(API_MARKET_HISTORY_KLINE, parameters);
