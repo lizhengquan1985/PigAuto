@@ -14,27 +14,24 @@ namespace PigRun
     {
         static ILog logger = LogManager.GetLogger(typeof(JudgeBuyUtils));
 
-        public static bool CheckCalcMaxhuoluo(string coin, string toCoin, string minPeriod = "1min")
+        public static bool CheckCalcMaxhuoluo(List<HistoryKline> data, PlatformApi api)
         {
-            ResponseKline res = AnaylyzeApi().kline(coin + toCoin, minPeriod, 1440);
-            Console.WriteLine(Utils.GetDateById(res.data[0].id));
-            Console.WriteLine(Utils.GetDateById(res.data[res.data.Count - 1].id));
             decimal max = 0;
             decimal min = 999999;
-            decimal now = res.data[0].open;
-            foreach (var item in res.data)
+            decimal now = data[0].Open;
+            foreach (var item in data)
             {
-                if (max < item.open)
+                if (max < item.Open)
                 {
-                    max = item.open;
+                    max = item.Open;
                 }
-                if (min > item.open)
+                if (min > item.Open)
                 {
-                    min = item.open;
+                    min = item.Open;
                 }
             }
-            logger.Error($"火币回落, {max}, {min} {res.data[0].open}");
-            return max > res.data[0].open * (decimal)1.02; // 是否下降2%
+            logger.Error($"火币回落, {max}, {min} {data[0].Open}");
+            return max > data[0].Open * (decimal)1.02; // 是否下降2%
         }
 
         public static bool IsQuickRise(string coin, List<HistoryKline> historyKlines)

@@ -26,17 +26,17 @@ namespace PigService
         /// </summary>
         /// <param name="accountId"></param>
         /// <returns></returns>
-        public List<PigMore> ListNeedChangeBuyStatePigMore(string accountId)
+        public List<PigMore> ListNeedChangeBuyStatePigMore()
         {
             var states = $"'{StateConst.PartialFilled}','{StateConst.Filled}'";
-            var sql = $"select * from t_pig_more where AccountId='{accountId}' and BState not in({states}) and UserName='{AccountConfig.userName}'";
+            var sql = $"select * from t_pig_more where BState not in({states})";
             return Database.Query<PigMore>(sql).ToList();
         }
 
-        public List<PigMore> ListNeedChangeSellStatePigMore(string accountId)
+        public List<PigMore> ListNeedChangeSellStatePigMore()
         {
             var states = $"'{StateConst.PartialFilled}','{StateConst.Filled}'";
-            var sql = $"select * from t_pig_more where AccountId='{accountId}' and SState not in({states}) and UserName='{AccountConfig.userName}'";
+            var sql = $"select * from t_pig_more where SState not in({states})";
             return Database.Query<PigMore>(sql).ToList();
         }
 
@@ -96,7 +96,7 @@ namespace PigService
             return Database.Query<int>(sql).FirstOrDefault();
         }
 
-        public void ChangeDataWhenSell(long id, decimal sellTotalQuantity, decimal sellOrderPrice, string sellOrderResult, string sellAnalyze, string sellOrderId)
+        public void ChangeDataWhenSell(long id, decimal sellTotalQuantity, decimal sellOrderPrice, string sellOrderResult, string sellAnalyze, long sellOrderId)
         {
             if (sellAnalyze.Length > 4500)
             {

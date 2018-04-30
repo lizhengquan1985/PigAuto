@@ -10,13 +10,13 @@ namespace PigPlatform.Model
     public class CommonSymbols
     {
         /// <summary>
-        /// 如u-s-d-t
+        /// 如 e-t-h
         /// </summary>
         [JsonProperty(PropertyName = "base-currency")]
         public string BaseCurrency { get; set; }
 
         /// <summary>
-        /// 如 e-t-h
+        /// 如 u-s-d-t
         /// </summary>
         [JsonProperty(PropertyName = "quote-currency")]
         public string QuoteCurrency { get; set; }

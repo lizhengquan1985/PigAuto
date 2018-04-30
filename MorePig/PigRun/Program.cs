@@ -20,7 +20,7 @@ namespace PigRun
             logger.Info("----------------------  begin  --------------------------------");
             Console.WriteLine("请输入角色");
             var userName = Console.ReadLine();
-            while(userName != "qq" || userName != "xx")
+            while(userName != "qq" && userName != "xx")
             {
                 userName = Console.ReadLine();
                 AccountConfig.init(userName);
@@ -29,10 +29,9 @@ namespace PigRun
             // 初始化
             CoinUtils.Init();
             Console.WriteLine(JsonConvert.SerializeObject(CoinUtils.GetAllCommonSymbols()));
-
+            // TODO 最小购买数量
             PlatformApi api = new PlatformApi();
             var symbols = CoinUtils.GetAllCommonSymbols();
-            symbols = symbols.FindAll(it => it.BaseCurrency == "usdt");
 
             // 定时任务， 不停的获取最新数据， 以供分析使用
             Task.Run(() =>
@@ -44,7 +43,7 @@ namespace PigRun
                         try
                         {
                             var period = "1min";
-                            var klines = api.GetHistoryKline(symbol.QuoteCurrency + symbol.BaseCurrency, "1min");
+                            var klines = api.GetHistoryKline(symbol.BaseCurrency + symbol.QuoteCurrency, "1min");
                             var key = HistoryKlinePools.GetKey(symbol, period);
                             HistoryKlinePools.Init(key, klines);
                             Console.WriteLine(DateTime.Now);
@@ -60,7 +59,7 @@ namespace PigRun
             // 不停的对每个币做操作
             foreach (var symbol in symbols)
             {
-                RunCoin(symbol, api);
+                //RunCoin(symbol, api);
             }
 
             Task.Run(() =>
@@ -69,8 +68,7 @@ namespace PigRun
                 {
                     try
                     {
-
-                        CoinTrade.CheckBuyOrSellState();
+                        //CoinTrade.CheckBuyOrSellState(api);
                     }
                     catch (Exception ex)
                     {

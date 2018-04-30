@@ -120,7 +120,7 @@ namespace PigRun
             // 3. 如果flexpoint 小于等于1.02，则只能考虑买少一点。
             // 4. 余额要足够，推荐购买的额度要大于0.3
             // 5. 
-            if (!flexPointList[0].isHigh && recommendAmount > (decimal)0.3 && !JudgeBuyUtils.IsQuickRise(symbol.QuoteCurrency, historyKlines) && JudgeBuyUtils.CheckCalcMaxhuoluo())
+            if (!flexPointList[0].isHigh && recommendAmount > (decimal)0.3 && !JudgeBuyUtils.IsQuickRise(symbol.QuoteCurrency, historyKlines) && JudgeBuyUtils.CheckCalcMaxhuoluo(historyKlines, api))
             {
                 decimal buyQuantity = recommendAmount / nowPrice;
 
@@ -158,7 +158,7 @@ namespace PigRun
                         BOrderMatchResults = "",
 
                         HasSell = false,
-                        SOrderId = "",
+                        SOrderId = 0,
                         SOrderResult = "",
                         SDate = DateTime.MinValue,
                         SFlex = "",
@@ -290,11 +290,11 @@ namespace PigRun
             }
         }
 
-        public static void CheckBuyOrSellState(string accountId, PlatformApi api)
+        public static void CheckBuyOrSellState(PlatformApi api)
         {
             try
             {
-                var needChangeBuyStatePigMoreList = new PigMoreDao().ListNeedChangeBuyStatePigMore(accountId);
+                var needChangeBuyStatePigMoreList = new PigMoreDao().ListNeedChangeBuyStatePigMore();
                 foreach (var item in needChangeBuyStatePigMoreList)
                 {
                     // 如果长时间没有购买成功， 则取消订单。
@@ -309,7 +309,7 @@ namespace PigRun
 
             try
             {
-                var needChangeSellStatePigMoreList = new PigMoreDao().ListNeedChangeSellStatePigMore(accountId);
+                var needChangeSellStatePigMoreList = new PigMoreDao().ListNeedChangeSellStatePigMore();
                 foreach (var item in needChangeSellStatePigMoreList)
                 {
                     // 如果长时间没有出售成功， 则取消订单。
