@@ -14,24 +14,32 @@ namespace PigRun
     {
         static ILog logger = LogManager.GetLogger(typeof(JudgeBuyUtils));
 
+        public static bool CheckCanBuy(decimal nowOpen, decimal nearLowOpen)
+        {
+            //nowOpen > flexPointList[0].open * (decimal)1.005 && nowOpen < flexPointList[0].open * (decimal)1.01
+            var canbuy = nowOpen > nearLowOpen * (decimal)1.005 && nowOpen < nearLowOpen * (decimal)1.01;
+            logger.Error($"------- {canbuy}还不能购买 nowOpen:{nowOpen}, nearLowOpen:{nearLowOpen}");
+            return canbuy;
+        }
+
         public static bool CheckCalcMaxhuoluo(List<HistoryKline> data, PlatformApi api)
         {
             decimal max = 0;
             decimal min = 999999;
-            decimal now = data[0].Open;
+            decimal nowPrice = data[0].Close;
             foreach (var item in data)
             {
-                if (max < item.Open)
+                if (max < item.Close)
                 {
-                    max = item.Open;
+                    max = item.Close;
                 }
-                if (min > item.Open)
+                if (min > item.Close)
                 {
-                    min = item.Open;
+                    min = item.Close;
                 }
             }
-            logger.Error($"火币回落, {max}, {min} {data[0].Open}");
-            return max > data[0].Open * (decimal)1.02; // 是否下降2%
+            logger.Error($"火币回落(是否下降2%), max:{max}, min:{min}, nowPrice:{data[0].Close}, 比率：{nowPrice / max}");
+            return max > nowPrice * (decimal)1.02; // 是否下降2%
         }
 
         public static bool IsQuickRise(string coin, List<HistoryKline> historyKlines)
@@ -39,7 +47,7 @@ namespace PigRun
             // 暂时判断 1个小时内是否上涨超过12%， 如果超过，则控制下
             var max = (decimal)0;
             var min = (decimal)9999999;
-            var nowOpen = historyKlines[0].Open;
+            var nowClose = historyKlines[0].Close;
             for (var i = 0; i < 60; i++)
             {
                 var item = historyKlines[i];
@@ -55,9 +63,9 @@ namespace PigRun
             bool isQuickRise = false;
             if (max > min * (decimal)1.12)
             {
-                if (nowOpen > min * (decimal)1.03)
+                if (nowClose > min * (decimal)1.04)
                 {
-                    logger.Error($"一个小时内有大量的上涨，防止追涨，所以不能交易。coin:{coin}, nowOpen:{nowOpen}, min:{min}, max:{max}");
+                    logger.Error($"一个小时内有大量的上涨，防止追涨，所以不能交易。coin:{coin}, nowClose:{nowClose}, min:{min}, max:{max}");
                     isQuickRise = true;
                 }
             }

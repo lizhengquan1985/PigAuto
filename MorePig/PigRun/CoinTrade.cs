@@ -83,7 +83,7 @@ namespace PigRun
 
             var accountInfo = api.GetAccountBalance(accountId);
             var usdt = accountInfo.Data.list.Find(it => it.currency == "usdt");
-            decimal recommendAmount = usdt.balance / 600; // TODO 测试阶段，暂定低一些，
+            decimal recommendAmount = usdt.balance / 400; // TODO 测试阶段，暂定低一些，
             Console.Write($"spot--------> 开始 {symbol.BaseCurrency}  推荐额度：{decimal.Round(recommendAmount, 2)} ");
 
             // 获取最近的购买记录
@@ -93,8 +93,22 @@ namespace PigRun
             // 3. 如果flexpoint 小于等于1.02，则只能考虑买少一点。
             // 4. 余额要足够，推荐购买的额度要大于0.3
             // 5. 
-            if (!flexPointList[0].isHigh && recommendAmount > (decimal)0.3 && !JudgeBuyUtils.IsQuickRise(symbol.QuoteCurrency, historyKlines) && JudgeBuyUtils.CheckCalcMaxhuoluo(historyKlines, api))
+            if (!flexPointList[0].isHigh && recommendAmount > (decimal)0.3 && !JudgeBuyUtils.IsQuickRise(symbol.BaseCurrency, historyKlines) && JudgeBuyUtils.CheckCalcMaxhuoluo(historyKlines, api))
             {
+                var noSellList = new PigMoreDao().ListPigMore(accountId, symbol.BaseCurrency, new List<string> { StateConst.PartialFilled, StateConst.Submitted, StateConst.Submitting, StateConst.PreSubmitted });
+                var canBuy = JudgeBuyUtils.CheckCanBuy(nowPrice, flexPointList[0].open);
+                decimal minBuyPrice = 999999;
+                noSellList.ForEach(item =>
+                {
+                    if (item.BOrderP < minBuyPrice)
+                    {
+                        minBuyPrice = item.BOrderP;
+                    }
+                });
+                if(!canBuy || nowPrice * (decimal)1.03 > minBuyPrice)
+                {
+                    return;
+                }
                 decimal buyQuantity = recommendAmount / nowPrice;
 
                 buyQuantity = decimal.Round(buyQuantity, symbol.AmountPrecision);
@@ -251,7 +265,7 @@ namespace PigRun
                             sellQuantity = 1;
                         }
                         // 出售
-                        decimal sellPrice = decimal.Round(itemNowOpen * (decimal)0.985, symbol.PricePrecision);
+                        decimal sellPrice = decimal.Round(itemNowPrice * (decimal)0.985, symbol.PricePrecision);
                         OrderPlaceRequest req = new OrderPlaceRequest();
                         req.account_id = accountId;
                         req.amount = sellQuantity.ToString();
@@ -268,7 +282,7 @@ namespace PigRun
                         }
                         else
                         {
-                            logger.Error($"出售结果 coin{symbol.QuoteCurrency} accountId:{accountId}  出售数量{sellQuantity} itemNowOpen{itemNowOpen} higher{higher} {JsonConvert.SerializeObject(order)}");
+                            logger.Error($"出售结果 coin{symbol.QuoteCurrency} accountId:{accountId}  出售数量{sellQuantity} itemNowOpen{itemNowPrice} higher{higher} {JsonConvert.SerializeObject(order)}");
                             logger.Error($"出售结果 分析 {JsonConvert.SerializeObject(flexPointList)}");
                         }
                     }
