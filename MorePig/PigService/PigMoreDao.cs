@@ -70,30 +70,6 @@ namespace PigService
 
         #endregion
 
-        /// <summary>
-        /// 获取没有出售的数量
-        /// </summary>
-        /// <param name="accountId"></param>
-        /// <param name="coin"></param>
-        /// <returns></returns>
-        public int GetNoSellRecordCount(string accountId, string coin)
-        {
-            var sql = $"select count(1) from t_spot_record where AccountId='{accountId}' and Coin = '{coin}' and HasSell=0 and UserName='{AccountConfig.userName}' and celuo=0";
-            return Database.Query<int>(sql).FirstOrDefault();
-        }
-
-        public List<PigMore> ListNoSellRecord(string accountId, string coin)
-        {
-            var sql = $"select * from t_spot_record where AccountId='{accountId}' and Coin = '{coin}' and HasSell=0 and UserName='{AccountConfig.userName}' and celuo=0";
-            return Database.Query<PigMore>(sql).ToList();
-        }
-
-        public List<PigMore> ListAllNoSellRecord(string accountId)
-        {
-            var sql = $"select * from t_spot_record where AccountId='{accountId}' and HasSell=0 and UserName='{AccountConfig.userName}'";
-            return Database.Query<PigMore>(sql).ToList();
-        }
-
         public List<PigMore> ListPigMore(string accountId, string coin, List<string> stateList)
         {
             var states = "";
@@ -109,26 +85,11 @@ namespace PigService
             return Database.Query<PigMore>(sql).ToList();
         }
 
-        public int GetAllNoSellRecordCount()
+        public void ChangeDataWhenSell(long id, decimal sellQuantity, decimal sellOrderPrice, string sellOrderResult, string sFlex, long sellOrderId)
         {
-            var sql = $"select count(1) from t_spot_record where HasSell=0 and UserName='{AccountConfig.userName}'";
-            return Database.Query<int>(sql).FirstOrDefault();
-        }
-
-        public void ChangeDataWhenSell(long id, decimal sellTotalQuantity, decimal sellOrderPrice, string sellOrderResult, string sellAnalyze, long sellOrderId)
-        {
-            if (sellAnalyze.Length > 4500)
-            {
-                sellAnalyze = sellAnalyze.Substring(0, 4500);
-            }
-            if (sellOrderResult.Length > 500)
-            {
-                sellOrderResult = sellOrderResult.Substring(0, 500);
-            }
-
             using (var tx = Database.BeginTransaction())
             {
-                var sql = $"update t_spot_record set HasSell=1, SellTotalQuantity={sellTotalQuantity}, sellOrderPrice={sellOrderPrice}, SellDate=now(), SellAnalyze='{sellAnalyze}', SellOrderResult='{sellOrderResult}',SellOrderId={sellOrderId} where Id = {id}";
+                var sql = $"update t_pig_more set SQuantity={sellQuantity}, SOrderP={sellOrderPrice}, SDate=now(), SFlex='{sFlex}', SOrderResult='{sellOrderResult}',SOrderId={sellOrderId} where Id = {id}";
                 Database.Execute(sql);
                 tx.Commit();
             }
