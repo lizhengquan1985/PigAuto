@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using PigAccount;
 using PigPlatform;
 using PigPlatform.Model;
+using PigService;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,6 +24,7 @@ namespace PigRun
             ILog logger = LogManager.GetLogger("program");
 
             logger.Info("----------------------  begin  --------------------------------");
+            new PigMoreDao().ListNeedChangeBuyStatePigMore();
 
             Console.WriteLine("请输入角色");
             while(true)
@@ -54,10 +56,10 @@ namespace PigRun
                         try
                         {
                             var period = "1min";
-                            var klines = api.GetHistoryKline(symbol.BaseCurrency + symbol.QuoteCurrency, "1min");
+                            var klines = api.GetHistoryKline(symbol.BaseCurrency + symbol.QuoteCurrency, period);
                             var key = HistoryKlinePools.GetKey(symbol, period);
                             HistoryKlinePools.Init(key, klines);
-                            //Console.WriteLine(DateTime.Now);
+                            Console.WriteLine($"初始化基础数据结束：{symbol.BaseCurrency}, {period}");
                         }
                         catch (Exception ex)
                         {
@@ -70,6 +72,10 @@ namespace PigRun
             // 不停的对每个币做操作
             foreach (var symbol in symbols)
             {
+                //if(symbol.BaseCurrency != "xrp" && symbol.BaseCurrency != "eos" && symbol.BaseCurrency != "elf")
+                //{
+                //    continue;
+                //}
                 RunCoin(symbol, api);
             }
 

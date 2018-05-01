@@ -12,10 +12,14 @@ using System.Threading.Tasks;
 
 namespace PigService
 {
-    public class PigMoreDao : BaseDao
+    public class PigMoreDao
     {
+        protected IDapperConnection Database { get; private set; }
         public PigMoreDao():base()
         {
+            string connectionString = AccountConfig.sqlConfig;
+            var connection = new MySqlConnection(connectionString);
+            Database = new DapperConnection(connection);
         }
 
         public void CreatePigMore(PigMore pigMore)
@@ -85,7 +89,7 @@ namespace PigService
                 }
                 states += $"'{it}'";
             });
-            var sql = $"select * from t_pig_more where AccountId='{accountId}' and Name = '{coin}' and HasSell=0 and BState in({states}) and UserName='{AccountConfig.userName}'";
+            var sql = $"select * from t_pig_more where AccountId='{accountId}' and Name = '{coin}' and BState in({states}) and UserName='{AccountConfig.userName}'";
             return Database.Query<PigMore>(sql).ToList();
         }
 
