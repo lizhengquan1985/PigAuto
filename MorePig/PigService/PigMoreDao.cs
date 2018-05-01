@@ -85,7 +85,7 @@ namespace PigService
                 }
                 states += $"'{it}'";
             });
-            var sql = $"select * from t_pig_more where AccountId='{accountId}' and Coin = '{coin}' and HasSell=0 and BState in({states}) and UserName='{AccountConfig.userName}'";
+            var sql = $"select * from t_pig_more where AccountId='{accountId}' and Name = '{coin}' and HasSell=0 and BState in({states}) and UserName='{AccountConfig.userName}'";
             return Database.Query<PigMore>(sql).ToList();
         }
 

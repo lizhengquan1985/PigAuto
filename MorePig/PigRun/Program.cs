@@ -23,6 +23,7 @@ namespace PigRun
             ILog logger = LogManager.GetLogger("program");
 
             logger.Info("----------------------  begin  --------------------------------");
+
             Console.WriteLine("请输入角色");
             while(true)
             {
