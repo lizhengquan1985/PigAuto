@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PigRun
@@ -24,13 +25,12 @@ namespace PigRun
             ILog logger = LogManager.GetLogger("program");
 
             logger.Info("----------------------  begin  --------------------------------");
-            new PigMoreDao().ListNeedChangeBuyStatePigMore();
 
             Console.WriteLine("请输入角色");
-            while(true)
+            while (true)
             {
                 var userName = Console.ReadLine();
-                if(userName != "qq" && userName != "xx")
+                if (userName != "qq" && userName != "xx")
                 {
                     continue;
                 }
@@ -40,42 +40,25 @@ namespace PigRun
 
             // 初始化
             CoinUtils.Init();
-            Console.WriteLine(JsonConvert.SerializeObject(CoinUtils.GetAllCommonSymbols()));
+            Console.WriteLine("交易对："+JsonConvert.SerializeObject(CoinUtils.GetAllCommonSymbols()));
             // TODO 最小购买数量
             PlatformApi.Init(AccountConfig.accessKey, AccountConfig.secretKey);
             PlatformApi api = PlatformApi.GetInstance();
             var symbols = CoinUtils.GetAllCommonSymbols();
 
             // 定时任务， 不停的获取最新数据， 以供分析使用
-            Task.Run(() =>
+            foreach (var symbol in symbols)
             {
-                while (true)
-                {
-                    foreach (var symbol in symbols)
-                    {
-                        try
-                        {
-                            var period = "1min";
-                            var klines = api.GetHistoryKline(symbol.BaseCurrency + symbol.QuoteCurrency, period);
-                            var key = HistoryKlinePools.GetKey(symbol, period);
-                            HistoryKlinePools.Init(key, klines);
-                            Console.WriteLine($"初始化基础数据结束：{symbol.BaseCurrency}, {period}");
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine($"获取基础数据出错。{JsonConvert.SerializeObject(symbol)}");
-                        }
-                    }
-                }
-            });
+                RunHistoryKline(symbol, api);
+            }
 
             // 不停的对每个币做操作
             foreach (var symbol in symbols)
             {
-                //if(symbol.BaseCurrency != "xrp" && symbol.BaseCurrency != "eos" && symbol.BaseCurrency != "elf")
-                //{
-                //    continue;
-                //}
+                if (symbol.BaseCurrency != "xrp" && symbol.BaseCurrency != "eos" && symbol.BaseCurrency != "elf")
+                {
+                    continue;
+                }
                 RunCoin(symbol, api);
             }
 
@@ -108,10 +91,30 @@ namespace PigRun
                 {
                     CoinTrade.Run(symbol, api);
                 }
-                // 分析币 按flex 从大到小排。
-                // 计算整体是否跌
-                // 计算是否快速升高，以及是否快速降低。
             });
         }
+
+        private static void RunHistoryKline(CommonSymbols symbol, PlatformApi api)
+        {
+            Task.Run(() =>
+            {
+                while (true)
+                {
+                    try
+                    {
+                        var period = "1min";
+                        var klines = api.GetHistoryKline(symbol.BaseCurrency + symbol.QuoteCurrency, period);
+                        var key = HistoryKlinePools.GetKey(symbol, period);
+                        HistoryKlinePools.Init(key, klines);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"RunHistoryKline -> 获取基础数据出错。{JsonConvert.SerializeObject(symbol)}");
+                    }
+                    Thread.Sleep(1000);
+                }
+            });
+        }
+
     }
 }
