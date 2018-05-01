@@ -100,10 +100,12 @@ namespace PigRun
             // 3. 如果flexpoint 小于等于1.02，则只能考虑买少一点。
             // 4. 余额要足够，推荐购买的额度要大于0.3
             // 5. 
-            if (!flexPointList[0].isHigh && recommendAmount > (decimal)0.3 && !JudgeBuyUtils.IsQuickRise(symbol.BaseCurrency, historyKlines) && JudgeBuyUtils.CheckCalcMaxhuoluo(historyKlines, api))
+            if (!flexPointList[0].isHigh && recommendAmount > (decimal)0.3 && 
+                !JudgeBuyUtils.IsQuickRise(symbol.BaseCurrency, historyKlines) && 
+                JudgeBuyUtils.CheckCalcMaxhuoluo(historyKlines, api))
             {
                 var noSellList = new PigMoreDao().ListPigMore(accountId, symbol.BaseCurrency, new List<string> { StateConst.PartialFilled, StateConst.Submitted, StateConst.Submitting, StateConst.PreSubmitted });
-                var canBuy = JudgeBuyUtils.CheckCanBuy(nowPrice, flexPointList[0].open);
+                var canBuy = JudgeBuyUtils.CheckCanBuy(nowPrice, flexPointList[0].close);
                 decimal minBuyPrice = 999999;
                 noSellList.ForEach(item =>
                 {
@@ -128,51 +130,50 @@ namespace PigRun
                 req.source = "api";
                 req.symbol = "ethusdt";
                 req.type = "buy-limit";
-                //var result = api.OrderPlace(req);
                 Console.WriteLine($"开始下单, {JsonConvert.SerializeObject(req)}");
-                //HBResponse<long> order = api.OrderPlace(req);
-                //Console.WriteLine($"下单结果, {JsonConvert.SerializeObject(order)}");
-                //if (order.Status == "ok")
-                //{
-                //    new PigMoreDao().CreatePigMore(new PigMore()
-                //    {
-                //        Name = symbol.BaseCurrency,
-                //        AccountId = accountId,
-                //        UserName = AccountConfig.userName,
-                //        FlexPercent = flexPercent,
+                HBResponse<long> order = api.OrderPlace(req);
+                Console.WriteLine($"下单结果, {JsonConvert.SerializeObject(order)}");
+                if (order.Status == "ok")
+                {
+                    new PigMoreDao().CreatePigMore(new PigMore()
+                    {
+                        Name = symbol.BaseCurrency,
+                        AccountId = accountId,
+                        UserName = AccountConfig.userName,
+                        FlexPercent = flexPercent,
 
-                //        BQuantity = buyQuantity,
-                //        BOrderP = orderPrice,
-                //        BDate = DateTime.Now,
-                //        BOrderResult = JsonConvert.SerializeObject(order),
-                //        BState = StateConst.PreSubmitted,
-                //        BTradeP = 0,
-                //        BOrderId = order.Data,
-                //        BFlex = JsonConvert.SerializeObject(flexPointList),
-                //        BMemo = "",
-                //        BOrderDetail = "",
-                //        BOrderMatchResults = "",
+                        BQuantity = buyQuantity,
+                        BOrderP = orderPrice,
+                        BDate = DateTime.Now,
+                        BOrderResult = JsonConvert.SerializeObject(order),
+                        BState = StateConst.PreSubmitted,
+                        BTradeP = 0,
+                        BOrderId = order.Data,
+                        BFlex = JsonConvert.SerializeObject(flexPointList),
+                        BMemo = "",
+                        BOrderDetail = "",
+                        BOrderMatchResults = "",
 
-                //        SOrderId = 0,
-                //        SOrderResult = "",
-                //        SDate = DateTime.MinValue,
-                //        SFlex = "",
-                //        SMemo = "",
-                //        SOrderDetail = "",
-                //        SOrderMatchResults = "",
-                //        SOrderP = 0,
-                //        SQuantity = 0,
-                //        SState = "",
-                //        STradeP = 0,
-                //    });
-                //    // 下单成功马上去查一次
-                //    QueryBuyDetailAndUpdate(order.Data, api);
-                //}
-                //else
-                //{
-                //    logger.Error($"下单结果 coin{symbol.BaseCurrency} accountId:{accountId}  购买数量{buyQuantity} nowOpen{nowPrice} {JsonConvert.SerializeObject(order)}");
-                //    logger.Error($"下单结果 分析 {JsonConvert.SerializeObject(flexPointList)}");
-                //}
+                        SOrderId = 0,
+                        SOrderResult = "",
+                        SDate = DateTime.MinValue,
+                        SFlex = "",
+                        SMemo = "",
+                        SOrderDetail = "",
+                        SOrderMatchResults = "",
+                        SOrderP = 0,
+                        SQuantity = 0,
+                        SState = "",
+                        STradeP = 0,
+                    });
+                    // 下单成功马上去查一次
+                    QueryBuyDetailAndUpdate(order.Data, api);
+                }
+                else
+                {
+                    logger.Error($"下单结果 coin{symbol.BaseCurrency} accountId:{accountId}  购买数量{buyQuantity} nowOpen{nowPrice} {JsonConvert.SerializeObject(order)}");
+                    logger.Error($"下单结果 分析 {JsonConvert.SerializeObject(flexPointList)}");
+                }
             }
         }
 

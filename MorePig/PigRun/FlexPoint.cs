@@ -9,7 +9,7 @@ namespace PigRun
     public class FlexPoint
     {
         public bool isHigh { get; set; }
-        public decimal open { get; set; }
+        public decimal close { get; set; }
         public long id { get; set; }
     }
 }

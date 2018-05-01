@@ -55,7 +55,7 @@ namespace PigRun
             // 不停的对每个币做操作
             foreach (var symbol in symbols)
             {
-                if (symbol.BaseCurrency != "xrp" && symbol.BaseCurrency != "eos" && symbol.BaseCurrency != "elf")
+                if (symbol.BaseCurrency != "xrp" && symbol.BaseCurrency != "eos" && symbol.BaseCurrency != "elf"
                 {
                     continue;
                 }

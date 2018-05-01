@@ -20,68 +20,60 @@ namespace PigRun
 
             try
             {
-                //Console.WriteLine($"总数：{data.Count}");
-
                 nowPrice = data[0].Close;
 
                 List<FlexPoint> flexPointList = new List<FlexPoint>();
 
-                decimal openHigh = data[0].Open;
-                decimal openLow =data[0].Open;
+                decimal closeHigh = data[0].Close;
+                decimal closeLow = data[0].Close;
                 long idHigh = data[0].Id;
                 long idLow = data[0].Id;
                 int lastHighOrLow = 0; // 1 high, -1: low
                 foreach (var item in data)
                 {
-                    if (item.Open > openHigh)
+                    if (item.Close > closeHigh)
                     {
-                        openHigh = item.Open;
+                        closeHigh = item.Close;
                         idHigh = item.Id;
                     }
-                    if (item.Open < openLow)
+                    if (item.Close < closeLow)
                     {
-                        openLow = item.Open;
+                        closeLow = item.Close;
                         idLow = item.Id;
                     }
 
-                    if (openHigh >= openLow * (decimal)flexPercent)
+                    if (closeHigh >= closeLow * flexPercent)
                     {
                         var dtHigh = Utils.GetDateById(idHigh);
                         var dtLow = Utils.GetDateById(idLow);
-                        // 相差了2%， 说明是一个节点了。
+                        // 相差了flexPercent， 说明是一个节点了。
                         if (idHigh > idLow && lastHighOrLow != 1)
                         {
-                            flexPointList.Add(new FlexPoint() { isHigh = true, open = openHigh, id = idHigh });
+                            flexPointList.Add(new FlexPoint() { isHigh = true, close = closeHigh, id = idHigh });
                             lastHighOrLow = 1;
-                            openHigh = openLow;
+                            closeHigh = closeLow;
                             idHigh = idLow;
-                        }
+                        }// 改进
                         else if (idHigh < idLow && lastHighOrLow != -1)
                         {
-                            flexPointList.Add(new FlexPoint() { isHigh = false, open = openLow, id = idLow });
+                            flexPointList.Add(new FlexPoint() { isHigh = false, close = closeLow, id = idLow });
                             lastHighOrLow = -1;
-                            openLow = openHigh;
+                            closeLow = closeHigh;
                             idLow = idHigh;
-                        }
-                        else if (lastHighOrLow == 1)
-                        {
-
                         }
                     }
                 }
 
                 if (flexPointList.Count != 0 && flexPointList[0].isHigh)
                 {
-                    // 
                     foreach (var item in data)
                     {
-                        if (item.Id < flexPointList[0].id && lastLowPrice > item.Open)
+                        if (item.Id < flexPointList[0].id && lastLowPrice > item.Close)
                         {
-                            lastLowPrice = item.Open;
+                            lastLowPrice = item.Close;
                         }
                     }
                 }
-
                 return flexPointList;
             }
             catch (Exception ex)
