@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PigRun
+namespace PigRunService
 {
     public class FlexPoint
     {

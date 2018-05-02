@@ -1,17 +1,10 @@
-﻿using log4net;
-using Newtonsoft.Json;
-using PigAccount;
-using PigPlatform;
-using PigPlatform.Model;
-using PigService;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
-namespace PigRun
+namespace PigRunService
 {
     public class CoinTrade
     {
@@ -43,13 +36,15 @@ namespace PigRun
         {
             var accountId = AccountConfig.mainAccountId;
             var key = HistoryKlinePools.GetKey(symbol, "1min");
-            var historyKlines = HistoryKlinePools.Get(key);
-            if (historyKlines == null || historyKlines.Count == 0)
+            var historyKlineData = HistoryKlinePools.Get(key);
+            if (historyKlineData == null || historyKlineData.Data == null || historyKlineData.Data.Count == 0 || historyKlineData.Date < DateTime.Now.AddMinutes(-1))
             {
-                Console.WriteLine($"RunBuy 数据还未准备好：{JsonConvert.SerializeObject(symbol)}");
+                Console.WriteLine($"RunBuy 数据还未准备好：{symbol.BaseCurrency}");
+                logger.Error($"RunBuy 数据还未准备好：{symbol.BaseCurrency}, {JsonConvert.SerializeObject(historyKlineData)}");
                 Thread.Sleep(1000 * 5);
                 return;
             }
+            var historyKlines = historyKlineData.Data;
 
             // 获取最近行情
             decimal lastLowPrice;
@@ -100,8 +95,8 @@ namespace PigRun
             // 3. 如果flexpoint 小于等于1.02，则只能考虑买少一点。
             // 4. 余额要足够，推荐购买的额度要大于0.3
             // 5. 
-            if (!flexPointList[0].isHigh && recommendAmount > (decimal)0.3 && 
-                !JudgeBuyUtils.IsQuickRise(symbol.BaseCurrency, historyKlines) && 
+            if (!flexPointList[0].isHigh && recommendAmount > (decimal)0.3 &&
+                !JudgeBuyUtils.IsQuickRise(symbol.BaseCurrency, historyKlines) &&
                 JudgeBuyUtils.CheckCalcMaxhuoluo(historyKlines, api))
             {
                 var noSellList = new PigMoreDao().ListPigMore(accountId, symbol.BaseCurrency, new List<string> { StateConst.PartialFilled, StateConst.Submitted, StateConst.Submitting, StateConst.PreSubmitted });
@@ -169,10 +164,10 @@ namespace PigRun
                     // 下单成功马上去查一次
                     QueryBuyDetailAndUpdate(order.Data, api);
                 }
-                
-                    logger.Error($"下单结果 coin{symbol.BaseCurrency} accountId:{accountId}  购买数量{buyQuantity} nowOpen{nowPrice} {JsonConvert.SerializeObject(order)}");
-                    logger.Error($"下单结果 分析 {JsonConvert.SerializeObject(flexPointList)}");
-               
+
+                logger.Error($"下单结果 coin{symbol.BaseCurrency} accountId:{accountId}  购买数量{buyQuantity} nowOpen{nowPrice} {JsonConvert.SerializeObject(order)}");
+                logger.Error($"下单结果 分析 {JsonConvert.SerializeObject(flexPointList)}");
+
             }
         }
 
@@ -201,13 +196,16 @@ namespace PigRun
         {
             var accountId = AccountConfig.mainAccountId;
             var key = HistoryKlinePools.GetKey(symbol, "1min");
-            var historyKlines = HistoryKlinePools.Get(key);
-            if (historyKlines == null || historyKlines.Count == 0)
+            var historyKlineData = HistoryKlinePools.Get(key);
+            if (historyKlineData == null || historyKlineData.Data == null || historyKlineData.Data.Count == 0 || historyKlineData.Date < DateTime.Now.AddMinutes(-1))
             {
-                Console.WriteLine($"RunSell 数据还未准备好：{JsonConvert.SerializeObject(symbol)}");
+                Console.WriteLine($"RunSell 数据还未准备好：{symbol.BaseCurrency}");
+                logger.Error($"RunSell 数据还未准备好：{symbol.BaseCurrency}, {JsonConvert.SerializeObject(historyKlineData)}");
                 Thread.Sleep(1000 * 5);
                 return;
             }
+
+            var historyKlines = historyKlineData.Data;
 
             // 获取最近行情
             decimal lastLowPrice;
@@ -295,10 +293,10 @@ namespace PigRun
                             // 下单成功马上去查一次
                             QuerySellDetailAndUpdate(order.Data, api);
                         }
-                        
-                            logger.Error($"出售结果 coin{symbol.QuoteCurrency} accountId:{accountId}  出售数量{sellQuantity} itemNowOpen{itemNowPrice} higher{higher} {JsonConvert.SerializeObject(order)}");
-                            logger.Error($"出售结果 分析 {JsonConvert.SerializeObject(flexPointList)}");
-                       
+
+                        logger.Error($"出售结果 coin{symbol.QuoteCurrency} accountId:{accountId}  出售数量{sellQuantity} itemNowOpen{itemNowPrice} higher{higher} {JsonConvert.SerializeObject(order)}");
+                        logger.Error($"出售结果 分析 {JsonConvert.SerializeObject(flexPointList)}");
+
                     }
                 }
             }

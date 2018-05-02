@@ -98,6 +98,8 @@ namespace PigRun
         {
             Task.Run(() =>
             {
+                var countSuccess = 0;
+                var countError = 0;
                 while (true)
                 {
                     try
@@ -106,12 +108,17 @@ namespace PigRun
                         var klines = api.GetHistoryKline(symbol.BaseCurrency + symbol.QuoteCurrency, period);
                         var key = HistoryKlinePools.GetKey(symbol, period);
                         HistoryKlinePools.Init(key, klines);
+                        countSuccess++;
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"RunHistoryKline -> 获取基础数据出错。{JsonConvert.SerializeObject(symbol)}");
+                        countError++;
                     }
                     Thread.Sleep(1000);
+                    if(countSuccess % 100 == 0 || countError % 20 == 0)
+                    {
+                        Console.WriteLine($"RunHistoryKline -> Success:{countSuccess},Error:{countError}, {symbol.BaseCurrency}");
+                    }
                 }
             });
         }
