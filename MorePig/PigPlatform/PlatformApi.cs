@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using log4net;
+using Newtonsoft.Json;
 using PigPlatform.Model;
 using RestSharp;
 using System;
@@ -13,6 +14,7 @@ namespace PigPlatform
 {
     public class PlatformApi
     {
+        static ILog logger = LogManager.GetLogger(typeof(PlatformApi));
         #region Api配置信息
         /// <summary>
         /// API域名名称
@@ -75,7 +77,7 @@ namespace PigPlatform
         private static PlatformApi api = null;
         public static void Init(string accessKey, string secretKey, string huobi_host = "api.huobipro.com")
         {
-            if(api == null)
+            if (api == null)
             {
                 api = new PlatformApi(accessKey, secretKey, huobi_host);
             }
@@ -223,6 +225,7 @@ namespace PigPlatform
                 item.Value = item.Value.ToString().Replace("_", "-");
             }
             var result = client.Execute<HBResponse<T>>(request);
+            logger.Error("SendRequest " + resourcePath + " ---- > " + result.ErrorMessage + result.Content );
             return result.Data;
         }
         /// <summary>

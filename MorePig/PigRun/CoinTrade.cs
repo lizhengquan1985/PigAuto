@@ -128,11 +128,11 @@ namespace PigRun
                 req.amount = buyQuantity.ToString();
                 req.price = orderPrice.ToString();
                 req.source = "api";
-                req.symbol = "ethusdt";
+                req.symbol = symbol.BaseCurrency + symbol.QuoteCurrency;
                 req.type = "buy-limit";
-                Console.WriteLine($"开始下单, {JsonConvert.SerializeObject(req)}");
+                logger.Error($"开始下单, {JsonConvert.SerializeObject(req)}");
                 HBResponse<long> order = api.OrderPlace(req);
-                Console.WriteLine($"下单结果, {JsonConvert.SerializeObject(order)}");
+                logger.Error($"下单结果, {JsonConvert.SerializeObject(order)}");
                 if (order.Status == "ok")
                 {
                     new PigMoreDao().CreatePigMore(new PigMore()
@@ -169,11 +169,10 @@ namespace PigRun
                     // 下单成功马上去查一次
                     QueryBuyDetailAndUpdate(order.Data, api);
                 }
-                else
-                {
+                
                     logger.Error($"下单结果 coin{symbol.BaseCurrency} accountId:{accountId}  购买数量{buyQuantity} nowOpen{nowPrice} {JsonConvert.SerializeObject(order)}");
                     logger.Error($"下单结果 分析 {JsonConvert.SerializeObject(flexPointList)}");
-                }
+               
             }
         }
 
@@ -296,11 +295,10 @@ namespace PigRun
                             // 下单成功马上去查一次
                             QuerySellDetailAndUpdate(order.Data, api);
                         }
-                        else
-                        {
+                        
                             logger.Error($"出售结果 coin{symbol.QuoteCurrency} accountId:{accountId}  出售数量{sellQuantity} itemNowOpen{itemNowPrice} higher{higher} {JsonConvert.SerializeObject(order)}");
                             logger.Error($"出售结果 分析 {JsonConvert.SerializeObject(flexPointList)}");
-                        }
+                       
                     }
                 }
             }
