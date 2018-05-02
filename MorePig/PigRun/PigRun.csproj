@@ -64,6 +64,10 @@
       <Project>{c8869f2e-e048-42a0-8d99-71c5bc2b9729}</Project>
       <Name>PigPlatform</Name>
     </ProjectReference>
+    <ProjectReference Include="..\PigRunService\PigRunService.csproj">
+      <Project>{86fdc282-04b3-47e1-80d0-8a47982c117f}</Project>
+      <Name>PigRunService</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PigService\PigService.csproj">
       <Project>{0c7504a0-7451-48c1-82e9-df0131dd1345}</Project>
       <Name>PigService</Name>

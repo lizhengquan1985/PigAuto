@@ -1,7 +1,14 @@
-﻿using System;
+﻿using log4net;
+using Newtonsoft.Json;
+using PigAccount;
+using PigPlatform;
+using PigPlatform.Model;
+using PigService;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PigRunService
