@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PigService
 {
-    [Table("t_table_more")]
+    [Table("t_pig_more")]
     public class PigMore
     {
         public long Id { get; set; }
