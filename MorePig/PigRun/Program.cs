@@ -41,10 +41,6 @@ namespace PigRun
 
             // 初始化
             CoinUtils.Init();
-            Console.WriteLine("交易对："+JsonConvert.SerializeObject(CoinUtils.GetAllCommonSymbols()));
-            // TODO 最小购买数量
-            PlatformApi.Init(AccountConfig.accessKey, AccountConfig.secretKey);
-            PlatformApi api = PlatformApi.GetInstance();
             var symbols = CoinUtils.GetAllCommonSymbols();
 
             // 定时任务， 不停的获取最新数据， 以供分析使用
@@ -60,7 +56,7 @@ namespace PigRun
                 {
                     continue;
                 }
-                RunCoin(symbol, api);
+                RunCoin(symbol);
             }
 
             Task.Run(() =>
@@ -84,13 +80,13 @@ namespace PigRun
             }
         }
 
-        private static void RunCoin(CommonSymbols symbol, PlatformApi api)
+        private static void RunCoin(CommonSymbols symbol)
         {
             Task.Run(() =>
             {
                 while (true)
                 {
-                    CoinTrade.Run(symbol, api);
+                    CoinTrade.Run(symbol);
                 }
             });
         }

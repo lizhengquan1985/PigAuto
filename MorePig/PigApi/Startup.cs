@@ -5,6 +5,7 @@ using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Owin;
+using PigService;
 using SharpDapper;
 using System;
 using System.Collections.Generic;
@@ -55,7 +56,7 @@ namespace PigApi
 
             //注册 ApplicationService
             builder.RegisterAssemblyTypes(GetType().Assembly)
-                .Where(type => (typeof(BaseBiz).IsAssignableFrom(type) || typeof(IBaseDao).IsAssignableFrom(type)))
+                .Where(type => typeof(BaseDao).IsAssignableFrom(type))
                 .AsSelf().PropertiesAutowired()
                 .InstancePerRequest();
 

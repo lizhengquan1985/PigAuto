@@ -19,13 +19,14 @@ namespace Test
             XmlConfigurator.Configure(new FileInfo("log4net.config"));
             ILog logger = LogManager.GetLogger("program");
 
-            AccountConfig.init("xx");
-            PlatformApi api = new PlatformApi(AccountConfig.accessKey, AccountConfig.secretKey);
+            var userName = "xx";
+            var accountConfig = AccountConfigUtils.GetAccountConfig(userName);
+            PlatformApi api = PlatformApi.GetInstance(userName);
             var res = api.GetCommonSymbols();
             var res1 = api.GetHistoryKline("ltcusdt", "1min");
 
             OrderPlaceRequest req = new OrderPlaceRequest();
-            req.account_id = AccountConfig.mainAccountId;
+            req.account_id = accountConfig.MainAccountId;
             req.amount = "0.000001";
             req.price = "0.9";
             req.source = "api";

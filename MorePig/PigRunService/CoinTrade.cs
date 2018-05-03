@@ -17,12 +17,12 @@ namespace PigRunService
     {
         static ILog logger = LogManager.GetLogger(typeof(CoinTrade));
 
-        public static void Run(CommonSymbols symbol, PlatformApi api)
+        public static void Run(CommonSymbols symbol)
         {
             try
             {
                 // 计算是否适合购买
-                RunBuy(symbol, api);
+                RunBuy(symbol);
             }
             catch (Exception ex)
             {
@@ -31,7 +31,7 @@ namespace PigRunService
             try
             {
                 // 计算是否适合出售
-                RunSell(symbol, api);
+                RunSell(symbol);
             }
             catch (Exception ex)
             {
@@ -39,9 +39,8 @@ namespace PigRunService
             }
         }
 
-        private static void RunBuy(CommonSymbols symbol, PlatformApi api)
+        private static void RunBuy(CommonSymbols symbol)
         {
-            var accountId = AccountConfig.mainAccountId;
             var key = HistoryKlinePools.GetKey(symbol, "1min");
             var historyKlineData = HistoryKlinePools.Get(key);
             if (historyKlineData == null || historyKlineData.Data == null || historyKlineData.Data.Count == 0 || historyKlineData.Date < DateTime.Now.AddMinutes(-1))
@@ -90,24 +89,28 @@ namespace PigRunService
                 return;
             }
 
-            var accountInfo = api.GetAccountBalance(accountId);
-            var usdt = accountInfo.Data.list.Find(it => it.currency == "usdt");
-            decimal recommendAmount = usdt.balance / 400; // TODO 测试阶段，暂定低一些，
-            Console.WriteLine($"RunBuy--------> 开始 {symbol.BaseCurrency}  推荐额度：{decimal.Round(recommendAmount, 2)} ");
-
-            // 获取最近的购买记录
-            // 购买的要求
-            // 1. 最近一次是低点， 并且有上升的迹象。
-            // 2. 快速上升的，快速下降情况（如果升的太高， 最一定要回落，或者有5个小时平稳才考虑购入，）
-            // 3. 如果flexpoint 小于等于1.02，则只能考虑买少一点。
-            // 4. 余额要足够，推荐购买的额度要大于0.3
-            // 5. 
-            if (!flexPointList[0].isHigh && recommendAmount > (decimal)0.3 &&
-                !JudgeBuyUtils.IsQuickRise(symbol.BaseCurrency, historyKlines) &&
-                JudgeBuyUtils.CheckCalcMaxhuoluo(historyKlines, api))
+            if (flexPointList[0].isHigh || JudgeBuyUtils.IsQuickRise(symbol.BaseCurrency, historyKlines)
+                || JudgeBuyUtils.CheckCalcMaxhuoluo(historyKlines))
             {
+                // 最高点 不适合购入
+                // 快速升高 不适合购入
+                // 大量回落 不适合购入
+                return;
+            }
+
+            var userNames = UserPools.GetAllUserName();
+            foreach (var userName in userNames)
+            {
+                AccountConfig accountConfig = AccountConfigUtils.GetAccountConfig(userName);
+                var accountId = accountConfig.MainAccountId;
+
                 var noSellList = new PigMoreDao().ListPigMore(accountId, symbol.BaseCurrency, new List<string> { StateConst.PartialFilled, StateConst.Submitted, StateConst.Submitting, StateConst.PreSubmitted });
                 var canBuy = JudgeBuyUtils.CheckCanBuy(nowPrice, flexPointList[0].close);
+                if (!canBuy)
+                {
+                    continue;
+                }
+
                 decimal minBuyPrice = 999999;
                 noSellList.ForEach(item =>
                 {
@@ -116,10 +119,32 @@ namespace PigRunService
                         minBuyPrice = item.BOrderP;
                     }
                 });
-                if (!canBuy || nowPrice * (decimal)1.03 > minBuyPrice)
+
+                if (nowPrice * (decimal)1.03 > minBuyPrice)
                 {
-                    return;
+                    // 最近一次购入,没有低于3%
+                    continue;
                 }
+
+                PlatformApi api = PlatformApi.GetInstance(userName);
+                var accountInfo = api.GetAccountBalance(accountId);
+                var usdt = accountInfo.Data.list.Find(it => it.currency == "usdt");
+                decimal recommendAmount = usdt.balance / 400; // TODO 测试阶段，暂定低一些，
+                Console.WriteLine($"RunBuy--------> 开始 {symbol.BaseCurrency}  推荐额度：{decimal.Round(recommendAmount, 2)} ");
+
+                if (recommendAmount < (decimal)0.3)
+                {
+                    continue;
+                }
+
+                // 获取最近的购买记录
+                // 购买的要求
+                // 1. 最近一次是低点， 并且有上升的迹象。
+                // 2. 快速上升的，快速下降情况（如果升的太高， 最一定要回落，或者有5个小时平稳才考虑购入，）
+                // 3. 如果flexpoint 小于等于1.02，则只能考虑买少一点。
+                // 4. 余额要足够，推荐购买的额度要大于0.3
+                // 5. 
+
                 decimal buyQuantity = recommendAmount / nowPrice;
 
                 buyQuantity = decimal.Round(buyQuantity, symbol.AmountPrecision);
@@ -141,7 +166,7 @@ namespace PigRunService
                     {
                         Name = symbol.BaseCurrency,
                         AccountId = accountId,
-                        UserName = AccountConfig.userName,
+                        UserName = accountConfig.UserName,
                         FlexPercent = flexPercent,
 
                         BQuantity = buyQuantity,
@@ -171,10 +196,8 @@ namespace PigRunService
                     // 下单成功马上去查一次
                     QueryBuyDetailAndUpdate(order.Data, api);
                 }
-
                 logger.Error($"下单结果 coin{symbol.BaseCurrency} accountId:{accountId}  购买数量{buyQuantity} nowOpen{nowPrice} {JsonConvert.SerializeObject(order)}");
                 logger.Error($"下单结果 分析 {JsonConvert.SerializeObject(flexPointList)}");
-
             }
         }
 
@@ -199,9 +222,9 @@ namespace PigRunService
             }
         }
 
-        private static void RunSell(CommonSymbols symbol, PlatformApi api)
+        private static void RunSell(CommonSymbols symbol)
         {
-            var accountId = AccountConfig.mainAccountId;
+            
             var key = HistoryKlinePools.GetKey(symbol, "1min");
             var historyKlineData = HistoryKlinePools.Get(key);
             if (historyKlineData == null || historyKlineData.Data == null || historyKlineData.Data.Count == 0 || historyKlineData.Date < DateTime.Now.AddMinutes(-1))
@@ -251,8 +274,17 @@ namespace PigRunService
                 return;
             }
 
-            if (flexPointList[0].isHigh)
+            if (!flexPointList[0].isHigh)
             {
+                // 最低点 不适合出售
+                return;
+            }
+
+            var userNames = UserPools.GetAllUserName();
+            foreach (var userName in userNames)
+            {
+                var accountConfig = AccountConfigUtils.GetAccountConfig(userName);
+                var accountId = accountConfig.MainAccountId;
                 var needSellPigMoreList = new PigMoreDao().ListPigMore(accountId, symbol.QuoteCurrency, new List<string>() { StateConst.PartialCanceled, StateConst.Filled });
 
                 foreach (var needSellPigMoreItem in needSellPigMoreList)

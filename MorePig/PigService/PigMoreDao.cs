@@ -12,14 +12,10 @@ using System.Threading.Tasks;
 
 namespace PigService
 {
-    public class PigMoreDao
+    public class PigMoreDao : BaseDao
     {
-        protected IDapperConnection Database { get; private set; }
-        public PigMoreDao():base()
+        public PigMoreDao() : base()
         {
-            string connectionString = AccountConfig.sqlConfig;
-            var connection = new MySqlConnection(connectionString);
-            Database = new DapperConnection(connection);
         }
 
         public void CreatePigMore(PigMore pigMore)

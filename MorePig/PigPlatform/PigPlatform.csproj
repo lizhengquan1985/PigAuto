@@ -69,5 +69,11 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PigAccount\PigAccount.csproj">
+      <Project>{82C294EA-BC97-4B9F-B0B5-17A9849DF604}</Project>
+      <Name>PigAccount</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,5 +1,6 @@
 ﻿using log4net;
 using Newtonsoft.Json;
+using PigAccount;
 using PigPlatform.Model;
 using RestSharp;
 using System;
@@ -19,7 +20,7 @@ namespace PigPlatform
         /// <summary>
         /// API域名名称
         /// </summary>
-        private readonly string HUOBI_HOST = string.Empty;
+        private readonly string HUOBI_HOST = "api.huobipro.com";
         /// <summary>
         /// APi域名地址
         /// </summary>
@@ -44,9 +45,8 @@ namespace PigPlatform
 
         #region 构造函数
         private RestClient client;//http请求客户端
-        public PlatformApi(string huobi_host = "api.huobipro.com")
+        public PlatformApi()
         {
-            HUOBI_HOST = huobi_host;
             HUOBI_HOST_URL = "https://" + HUOBI_HOST;
             if (string.IsNullOrEmpty(HUOBI_HOST))
                 throw new ArgumentException("HUOBI_HOST  Cannt Be Null Or Empty");
@@ -54,11 +54,10 @@ namespace PigPlatform
             client.AddDefaultHeader("Content-Type", "application/json");
             client.AddDefaultHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36");
         }
-        public PlatformApi(string accessKey, string secretKey, string huobi_host = "api.huobipro.com")
+        public PlatformApi(string accessKey, string secretKey)
         {
             ACCESS_KEY = accessKey;
             SECRET_KEY = secretKey;
-            HUOBI_HOST = huobi_host;
             HUOBI_HOST_URL = "https://" + HUOBI_HOST;
             if (string.IsNullOrEmpty(ACCESS_KEY))
                 throw new ArgumentException("ACCESS_KEY Cannt Be Null Or Empty");
@@ -72,19 +71,12 @@ namespace PigPlatform
         }
         #endregion
 
-        #region 单例模式
+        #region 工厂
 
-        private static PlatformApi api = null;
-        public static void Init(string accessKey, string secretKey, string huobi_host = "api.huobipro.com")
+        public static PlatformApi GetInstance(string userName)
         {
-            if (api == null)
-            {
-                api = new PlatformApi(accessKey, secretKey, huobi_host);
-            }
-        }
-
-        public static PlatformApi GetInstance()
-        {
+            AccountConfig accountConfig = AccountConfigUtils.GetAccountConfig(userName);
+            PlatformApi api = new PlatformApi(accountConfig.AccessKey, accountConfig.SecretKey);
             return api;
         }
 

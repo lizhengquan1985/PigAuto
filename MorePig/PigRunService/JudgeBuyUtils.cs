@@ -21,7 +21,7 @@ namespace PigRunService
             return canbuy;
         }
 
-        public static bool CheckCalcMaxhuoluo(List<HistoryKline> data, PlatformApi api)
+        public static bool CheckCalcMaxhuoluo(List<HistoryKline> data)
         {
             decimal max = 0;
             decimal min = 999999;

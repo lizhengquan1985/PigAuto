@@ -14,7 +14,7 @@ namespace PigService
         protected IDapperConnection Database { get; private set; }
         public BaseDao()
         {
-            string connectionString = AccountConfig.sqlConfig;
+            string connectionString = AccountConfigUtils.sqlConfig;
             var connection = new MySqlConnection(connectionString);
             Database = new DapperConnection(connection);
         }
