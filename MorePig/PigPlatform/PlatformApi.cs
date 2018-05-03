@@ -183,7 +183,8 @@ namespace PigPlatform
             }
             catch (Exception ex)
             {
-                logger.Error(JsonConvert.SerializeObject(result));
+                logger.Error(resourcePath);
+                logger.Error(JsonConvert.SerializeObject(result.Content));
                 logger.Error(ex.Message, ex);
                 throw ex;
             }
@@ -217,7 +218,8 @@ namespace PigPlatform
             }
             catch (Exception ex)
             {
-                logger.Error(JsonConvert.SerializeObject(result));
+                logger.Error(resourcePath);
+                logger.Error(JsonConvert.SerializeObject(result.Content));
                 logger.Error(ex.Message, ex);
                 throw ex;
             }
@@ -246,7 +248,8 @@ namespace PigPlatform
             }
             catch (Exception ex)
             {
-                logger.Error(JsonConvert.SerializeObject(result));
+                logger.Error(resourcePath);
+                logger.Error(JsonConvert.SerializeObject(result.Content));
                 logger.Error(ex.Message, ex);
                 throw ex;
             }
