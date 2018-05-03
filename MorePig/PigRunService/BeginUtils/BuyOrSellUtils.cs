@@ -30,6 +30,14 @@ namespace PigRunService.BeginUtils
             {
                 while (true)
                 {
+                    // 判断kline存不存在, 不存在读取一次.
+                    var key = HistoryKlinePools.GetKey(symbol, "1min");
+                    var historyKlineData = HistoryKlinePools.Get(key);
+                    if (historyKlineData == null || historyKlineData.Data == null || historyKlineData.Data.Count == 0 || historyKlineData.Date < DateTime.Now.AddSeconds(-10))
+                    {
+                        KlineUtils.InitOneKine(symbol);
+                    }
+
                     CoinTrade.Run(symbol);
                 }
             });

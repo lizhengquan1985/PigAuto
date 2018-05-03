@@ -57,5 +57,21 @@ namespace PigRunService.BeginUtils
                 }
             });
         }
+
+        public static void InitOneKine(CommonSymbols symbol)
+        {
+            try
+            {
+                PlatformApi api = PlatformApi.GetInstance("xx"); // 下面api和角色无关. 随便指定一个xx
+                var period = "1min";
+                var klines = api.GetHistoryKline(symbol.BaseCurrency + symbol.QuoteCurrency, period);
+                var key = HistoryKlinePools.GetKey(symbol, period);
+                HistoryKlinePools.Init(key, klines);
+            }
+            catch (Exception ex)
+            {
+                logger.Error("InitOneKine --> " + ex.Message, ex);
+            }
+        }
     }
 }
