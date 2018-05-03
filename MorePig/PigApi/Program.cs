@@ -1,6 +1,8 @@
 ﻿using log4net.Config;
 using Microsoft.Owin.Hosting;
+using PigPlatform;
 using PigRunService;
+using PigRunService.BeginUtils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -29,13 +31,27 @@ namespace PigApi
             options.Urls.Add("http://+:90");
             WebApp.Start<Startup>(options);
 
-            // 初始化k线
-            KlineUtils.Begin();
+            BeginTrade();
 
             while (true)
             {
                 Console.ReadLine();
             }
+        }
+
+        private static void BeginTrade()
+        {
+            // 初始化
+            CoinUtils.Init();
+
+            // 初始化k线
+            //KlineUtils.Begin();
+
+            // 不停的对每个币做操作
+            BuyOrSellUtils.Begin();
+
+            // 状态检查
+            TradeStateUtils.Begin();
         }
     }
 }

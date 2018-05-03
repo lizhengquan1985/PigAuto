@@ -1,5 +1,4 @@
 ﻿using log4net;
-using Newtonsoft.Json;
 using PigPlatform;
 using PigPlatform.Model;
 using System;
@@ -9,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PigRunService
+namespace PigRunService.BeginUtils
 {
     public class KlineUtils
     {
@@ -19,7 +18,6 @@ namespace PigRunService
         {
             logger.Info("----------------------  begin  --------------------------------");
             // 初始化
-            CoinUtils.Init();
             var symbols = CoinUtils.GetAllCommonSymbols();
 
             // 定时任务， 不停的获取最新数据， 以供分析使用

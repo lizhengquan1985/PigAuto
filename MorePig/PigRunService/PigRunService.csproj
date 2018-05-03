@@ -47,15 +47,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BeginUtils\TradeStateUtils.cs" />
     <Compile Include="CoinAnalyze.cs" />
     <Compile Include="CoinTrade.cs" />
-    <Compile Include="KlineUtils.cs" />
     <Compile Include="FlexPoint.cs" />
     <Compile Include="HistoryKlinePools.cs" />
     <Compile Include="JudgeBuyUtils.cs" />
     <Compile Include="JudgeSellUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UserPools.cs" />
+    <Compile Include="BeginUtils\BuyOrSellUtils.cs" />
+    <Compile Include="BeginUtils\KlineUtils.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PigAccount\PigAccount.csproj">

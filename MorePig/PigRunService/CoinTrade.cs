@@ -194,15 +194,17 @@ namespace PigRunService
                         STradeP = 0,
                     });
                     // 下单成功马上去查一次
-                    QueryBuyDetailAndUpdate(order.Data, api);
+                    QueryBuyDetailAndUpdate(userName, order.Data);
                 }
                 logger.Error($"下单结果 coin{symbol.BaseCurrency} accountId:{accountId}  购买数量{buyQuantity} nowOpen{nowPrice} {JsonConvert.SerializeObject(order)}");
                 logger.Error($"下单结果 分析 {JsonConvert.SerializeObject(flexPointList)}");
             }
         }
 
-        private static void QueryBuyDetailAndUpdate(long orderId, PlatformApi api)
+        private static void QueryBuyDetailAndUpdate(string userName, long orderId)
         {
+            PlatformApi api = PlatformApi.GetInstance(userName);
+
             var orderDetail = api.QueryOrderDetail(orderId);
             if (orderDetail.Status == "ok" && orderDetail.Data.state == "filled")
             {
@@ -224,7 +226,6 @@ namespace PigRunService
 
         private static void RunSell(CommonSymbols symbol)
         {
-
             var key = HistoryKlinePools.GetKey(symbol, "1min");
             var historyKlineData = HistoryKlinePools.Get(key);
             if (historyKlineData == null || historyKlineData.Data == null || historyKlineData.Data.Count == 0 || historyKlineData.Date < DateTime.Now.AddMinutes(-1))
@@ -331,7 +332,7 @@ namespace PigRunService
                         {
                             new PigMoreDao().ChangeDataWhenSell(needSellPigMoreItem.Id, sellQuantity, sellPrice, JsonConvert.SerializeObject(order), JsonConvert.SerializeObject(flexPointList), order.Data);
                             // 下单成功马上去查一次
-                            QuerySellDetailAndUpdate(order.Data, api);
+                            QuerySellDetailAndUpdate(userName, order.Data);
                         }
 
                         logger.Error($"出售结果 coin{symbol.QuoteCurrency} accountId:{accountId}  出售数量{sellQuantity} itemNowOpen{itemNowPrice} higher{higher} {JsonConvert.SerializeObject(order)}");
@@ -342,8 +343,10 @@ namespace PigRunService
             }
         }
 
-        private static void QuerySellDetailAndUpdate(long orderId, PlatformApi api)
+        private static void QuerySellDetailAndUpdate(string userName, long orderId)
         {
+            PlatformApi api = PlatformApi.GetInstance(userName);
+
             var orderDetail = api.QueryOrderDetail(orderId);
             if (orderDetail.Status == "ok" && orderDetail.Data.state == "filled")
             {
@@ -361,7 +364,7 @@ namespace PigRunService
             }
         }
 
-        public static void CheckBuyOrSellState(PlatformApi api)
+        public static void CheckBuyOrSellState()
         {
             try
             {
@@ -374,7 +377,7 @@ namespace PigRunService
                         //api.
                     }
                     // TODO
-                    QueryBuyDetailAndUpdate(item.BOrderId, api);
+                    QueryBuyDetailAndUpdate(item.UserName, item.BOrderId);
                 }
             }
             catch (Exception ex)
@@ -389,7 +392,7 @@ namespace PigRunService
                 {
                     // 如果长时间没有出售成功， 则取消订单。
                     // TODO
-                    QuerySellDetailAndUpdate(item.SOrderId, api);
+                    QuerySellDetailAndUpdate(item.UserName, item.SOrderId);
                 }
             }
             catch (Exception ex)

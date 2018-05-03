@@ -152,6 +152,10 @@
     <Folder Include="DataTypes\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\PigPlatform\PigPlatform.csproj">
+      <Project>{C8869F2E-E048-42A0-8D99-71C5BC2B9729}</Project>
+      <Name>PigPlatform</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PigRunService\PigRunService.csproj">
       <Project>{86FDC282-04B3-47E1-80D0-8A47982C117F}</Project>
       <Name>PigRunService</Name>

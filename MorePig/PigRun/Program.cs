@@ -5,6 +5,7 @@ using PigAccount;
 using PigPlatform;
 using PigPlatform.Model;
 using PigRunService;
+using PigRunService.BeginUtils;
 using PigService;
 using System;
 using System.Collections.Generic;
@@ -27,52 +28,18 @@ namespace PigRun
 
             logger.Info("----------------------  begin  --------------------------------");
 
-            Console.WriteLine("请输入角色");
-            while (true)
-            {
-                var userName = Console.ReadLine();
-                if (userName != "qq" && userName != "xx")
-                {
-                    continue;
-                }
-                AccountConfig.init(userName);
-                break;
-            }
-
             // 初始化
             CoinUtils.Init();
             var symbols = CoinUtils.GetAllCommonSymbols();
 
-            // 定时任务， 不停的获取最新数据， 以供分析使用
-            foreach (var symbol in symbols)
-            {
-                RunHistoryKline(symbol, api);
-            }
+            // 初始化kline
+            KlineUtils.Begin();
 
             // 不停的对每个币做操作
-            foreach (var symbol in symbols)
-            {
-                if (symbol.BaseCurrency != "xrp" && symbol.BaseCurrency != "eos" && symbol.BaseCurrency != "elf")
-                {
-                    continue;
-                }
-                RunCoin(symbol);
-            }
+            BuyOrSellUtils.Begin();
 
-            Task.Run(() =>
-            {
-                while (true)
-                {
-                    try
-                    {
-                        CoinTrade.CheckBuyOrSellState(api);
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.Error("查看购买以及出售结果" + ex.Message, ex);
-                    }
-                }
-            });
+            // 状态检查
+            TradeStateUtils.Begin();
 
             while (true)
             {
@@ -80,45 +47,6 @@ namespace PigRun
             }
         }
 
-        private static void RunCoin(CommonSymbols symbol)
-        {
-            Task.Run(() =>
-            {
-                while (true)
-                {
-                    CoinTrade.Run(symbol);
-                }
-            });
-        }
-
-        private static void RunHistoryKline(CommonSymbols symbol, PlatformApi api)
-        {
-            Task.Run(() =>
-            {
-                var countSuccess = 0;
-                var countError = 0;
-                while (true)
-                {
-                    try
-                    {
-                        var period = "1min";
-                        var klines = api.GetHistoryKline(symbol.BaseCurrency + symbol.QuoteCurrency, period);
-                        var key = HistoryKlinePools.GetKey(symbol, period);
-                        HistoryKlinePools.Init(key, klines);
-                        countSuccess++;
-                    }
-                    catch (Exception ex)
-                    {
-                        countError++;
-                    }
-                    Thread.Sleep(1000);
-                    if(countSuccess % 100 == 0 || countError % 20 == 0)
-                    {
-                        Console.WriteLine($"RunHistoryKline -> Success:{countSuccess},Error:{countError}, {symbol.BaseCurrency}");
-                    }
-                }
-            });
-        }
-
+        
     }
 }
