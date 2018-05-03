@@ -177,7 +177,16 @@ namespace PigPlatform
             //Console.WriteLine(url);
             var request = new RestRequest(url, Method.GET);
             var result = client.Execute(request);
-            return JsonConvert.DeserializeObject<HBResponse<T>>(result.Content);
+            try
+            {
+                return JsonConvert.DeserializeObject<HBResponse<T>>(result.Content);
+            }
+            catch (Exception ex)
+            {
+                logger.Error(result);
+                logger.Error(ex.Message, ex);
+                throw ex;
+            }
         }
 
         #endregion
@@ -199,8 +208,19 @@ namespace PigPlatform
             var url = $"{HUOBI_HOST_URL}{resourcePath}?{parameters}";
             //Console.WriteLine(url);
             var request = new RestRequest(url, Method.GET);
-            var result = client.Execute<HBResponse<T>>(request);
-            return result.Data;
+            var result = client.Execute(request);
+            try
+            {
+                //var result = client.Execute<HBResponse<T>>(request);
+                //return result.Data;
+                return JsonConvert.DeserializeObject<HBResponse<T>>(result.Content);
+            }
+            catch (Exception ex)
+            {
+                logger.Error(result);
+                logger.Error(ex.Message, ex);
+                throw ex;
+            }
         }
         private HBResponse<T> SendRequest<T, P>(string resourcePath, P postParameters) where T : new()
         {
@@ -216,9 +236,20 @@ namespace PigPlatform
             {
                 item.Value = item.Value.ToString().Replace("_", "-");
             }
-            var result = client.Execute<HBResponse<T>>(request);
-            logger.Error("SendRequest " + resourcePath + " ---- > " + result.ErrorMessage + result.Content );
-            return result.Data;
+            var result = client.Execute(request);
+            try
+            {
+                //var result = client.Execute<HBResponse<T>>(request);
+                //logger.Error("SendRequest " + resourcePath + " ---- > " + result.ErrorMessage + result.Content);
+                //return result.Data;
+                return JsonConvert.DeserializeObject<HBResponse<T>>(result.Content);
+            }
+            catch (Exception ex)
+            {
+                logger.Error(request);
+                logger.Error(ex.Message, ex);
+                throw ex;
+            }
         }
         /// <summary>
         /// 获取通用签名参数

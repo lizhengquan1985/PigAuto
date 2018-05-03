@@ -32,8 +32,8 @@ namespace PigAccount
             else if (userName == "xx")
             {
                 accountConfig.MainAccountId = "";
-                accountConfig.AccessKey = "";
-                accountConfig.SecretKey = "";
+                accountConfig.AccessKey = "xx";
+                accountConfig.SecretKey = "xx";
             }
 
             return accountConfig;

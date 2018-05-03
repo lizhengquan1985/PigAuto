@@ -10,15 +10,16 @@ namespace Test
 {
     public class PlatformTest
     {
-        PlatformApi api = new PlatformApi("", "");
 
         public void GetAllAccountTest()
         {
+            PlatformApi api = PlatformApi.GetInstance("xx");
             var result = api.GetAllAccount();
         }
 
         public void OrderPlaceTest()
         {
+            PlatformApi api = PlatformApi.GetInstance("xx");
             var accounts = api.GetAllAccount();
             var spotAccountId = accounts.FirstOrDefault(a => a.Type == "spot" && a.State == "working")?.Id;
             if (spotAccountId <= 0)

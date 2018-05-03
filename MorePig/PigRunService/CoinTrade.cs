@@ -104,7 +104,7 @@ namespace PigRunService
                 AccountConfig accountConfig = AccountConfigUtils.GetAccountConfig(userName);
                 var accountId = accountConfig.MainAccountId;
 
-                var noSellList = new PigMoreDao().ListPigMore(accountId, symbol.BaseCurrency, new List<string> { StateConst.PartialFilled, StateConst.Submitted, StateConst.Submitting, StateConst.PreSubmitted });
+                var noSellList = new PigMoreDao().ListPigMore(accountId, userName, symbol.BaseCurrency, new List<string> { StateConst.PartialFilled, StateConst.Submitted, StateConst.Submitting, StateConst.PreSubmitted });
                 var canBuy = JudgeBuyUtils.CheckCanBuy(nowPrice, flexPointList[0].close);
                 if (!canBuy)
                 {
@@ -224,7 +224,7 @@ namespace PigRunService
 
         private static void RunSell(CommonSymbols symbol)
         {
-            
+
             var key = HistoryKlinePools.GetKey(symbol, "1min");
             var historyKlineData = HistoryKlinePools.Get(key);
             if (historyKlineData == null || historyKlineData.Data == null || historyKlineData.Data.Count == 0 || historyKlineData.Date < DateTime.Now.AddMinutes(-1))
@@ -285,7 +285,7 @@ namespace PigRunService
             {
                 var accountConfig = AccountConfigUtils.GetAccountConfig(userName);
                 var accountId = accountConfig.MainAccountId;
-                var needSellPigMoreList = new PigMoreDao().ListPigMore(accountId, symbol.QuoteCurrency, new List<string>() { StateConst.PartialCanceled, StateConst.Filled });
+                var needSellPigMoreList = new PigMoreDao().ListPigMore(accountId, userName, symbol.QuoteCurrency, new List<string>() { StateConst.PartialCanceled, StateConst.Filled });
 
                 foreach (var needSellPigMoreItem in needSellPigMoreList)
                 {
@@ -325,6 +325,7 @@ namespace PigRunService
                         req.source = "api";
                         req.symbol = "ethusdt";
                         req.type = "sell-limit";
+                        PlatformApi api = PlatformApi.GetInstance(userName);
                         HBResponse<long> order = api.OrderPlace(req);
                         if (order.Status == "ok")
                         {

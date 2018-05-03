@@ -13,10 +13,10 @@ namespace PigPlatform
 
         public static void Init()
         {
-            PlatformApi api = new PlatformApi();
+            PlatformApi api = PlatformApi.GetInstance("xx"); // 不需要角色,可以随意xx
             var commonSymbols = api.GetCommonSymbols();
             commonSymbols = commonSymbols.FindAll(it => it.QuoteCurrency == "usdt");
-            foreach(var item in commonSymbols)
+            foreach (var item in commonSymbols)
             {
                 item.LeastBuyQuantity = 1; // TODO 改进
                 coins.Add(item.BaseCurrency, item);
@@ -36,7 +36,7 @@ namespace PigPlatform
         public static List<string> GetAllCoins()
         {
             // 总共其实有36个, 后期还会增加
-            if (coins.Count < 30)
+            if (coins.Count < 10)
             {
                 Init();
             }

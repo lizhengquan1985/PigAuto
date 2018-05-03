@@ -74,7 +74,7 @@ namespace PigService
 
         #endregion
 
-        public List<PigMore> ListPigMore(string accountId, string coin, List<string> stateList)
+        public List<PigMore> ListPigMore(string accountId, string userName, string coin, List<string> stateList)
         {
             var states = "";
             stateList.ForEach(it =>
@@ -85,7 +85,7 @@ namespace PigService
                 }
                 states += $"'{it}'";
             });
-            var sql = $"select * from t_pig_more where AccountId='{accountId}' and Name = '{coin}' and BState in({states}) and UserName='{AccountConfig.userName}'";
+            var sql = $"select * from t_pig_more where AccountId='{accountId}' and Name = '{coin}' and BState in({states}) and UserName='{userName}'";
             return Database.Query<PigMore>(sql).ToList();
         }
 

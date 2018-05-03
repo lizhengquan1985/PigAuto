@@ -36,6 +36,7 @@ namespace PigRunService
                 var countSuccess = 0;
                 var countError = 0;
                 PlatformApi api = PlatformApi.GetInstance("xx"); // 下面api和角色无关. 随便指定一个xx
+                var begin = DateTime.Now;
                 while (true)
                 {
                     try
@@ -50,10 +51,9 @@ namespace PigRunService
                     {
                         countError++;
                     }
-                    Thread.Sleep(1000);
-                    if (countSuccess % 100 == 0 || countError % 20 == 0)
+                    if (countSuccess % 20 == 0)
                     {
-                        Console.WriteLine($"RunHistoryKline -> Success:{countSuccess},Error:{countError}, {symbol.BaseCurrency}");
+                        Console.WriteLine($"RunHistoryKline -> {symbol.BaseCurrency}, Success:{countSuccess}, Error:{countError}, AvageSecond:{(DateTime.Now - begin).TotalSeconds / (countSuccess + countError)}");
                     }
                 }
             });
