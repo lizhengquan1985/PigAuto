@@ -55,6 +55,7 @@ namespace PigRunService
                     {
                         Console.WriteLine($"RunHistoryKline -> {symbol.BaseCurrency}, Success:{countSuccess}, Error:{countError}, AvageSecond:{(DateTime.Now - begin).TotalSeconds / (countSuccess + countError)}");
                     }
+                    Thread.Sleep(500);
                 }
             });
         }
