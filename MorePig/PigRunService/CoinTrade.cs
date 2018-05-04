@@ -299,7 +299,7 @@ namespace PigRunService
                 var accountId = accountConfig.MainAccountId;
                 var needSellPigMoreList = new PigMoreDao().GetNeedSellPigMore(accountId, userName, symbol.BaseCurrency);
 
-                Console.WriteLine($"可以出售的数量: {needSellPigMoreList.Count}, {accountId}, {userName}, {symbol.BaseCurrency}");
+                logger.Error($"可以出售的数量: {needSellPigMoreList.Count}, {accountId}, {userName}, {symbol.BaseCurrency}");
                 foreach (var needSellPigMoreItem in needSellPigMoreList)
                 {
                     // 分析是否 大于
@@ -321,6 +321,7 @@ namespace PigRunService
 
                     var canSell = JudgeSellUtils.CheckCanSell(needSellPigMoreItem.BOrderP, higher, itemNowPrice, gaoyuPercentSell, needHuitou);
 
+                    logger.Error($"是否能够出售: {needSellPigMoreList.Count}, {accountId}, {userName}, {symbol.BaseCurrency}, {canSell}");
                     if (canSell)
                     {
                         decimal sellQuantity = needSellPigMoreItem.BQuantity * (decimal)0.99;
