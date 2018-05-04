@@ -3,6 +3,7 @@ using log4net.Config;
 using PigAccount;
 using PigPlatform;
 using PigPlatform.Model;
+using PigService;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,6 +17,8 @@ namespace Test
     {
         static void Main(string[] args)
         {
+            var dt = Utils.GetDateById(1525377780);
+
             XmlConfigurator.Configure(new FileInfo("log4net.config"));
             ILog logger = LogManager.GetLogger("program");
 

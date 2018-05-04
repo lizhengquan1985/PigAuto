@@ -17,7 +17,9 @@ namespace PigRunService.BeginUtils
         public static void Begin()
         {
             var symbols = CoinUtils.GetAllCommonSymbols();
-            RunCoin(symbols.Where(it => it.BaseCurrency == "eos" || it.BaseCurrency == "xrp" || it.BaseCurrency == "elf" || it.BaseCurrency == "btm").ToList());
+            RunCoin(symbols.Where(it => it.BaseCurrency == "eos" || it.BaseCurrency == "xrp"
+            || it.BaseCurrency == "elf" || it.BaseCurrency == "btm"
+             || it.BaseCurrency == "theta" || it.BaseCurrency == "nas").ToList());
             //var splitIndex = 16;
             //RunCoin(symbols.GetRange(0, splitIndex + 1));
             //RunCoin(symbols.GetRange(splitIndex, symbols.Count - splitIndex));

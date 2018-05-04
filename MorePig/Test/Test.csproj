@@ -62,6 +62,10 @@
       <Project>{c8869f2e-e048-42a0-8d99-71c5bc2b9729}</Project>
       <Name>PigPlatform</Name>
     </ProjectReference>
+    <ProjectReference Include="..\PigService\PigService.csproj">
+      <Project>{0C7504A0-7451-48C1-82E9-DF0131DD1345}</Project>
+      <Name>PigService</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
