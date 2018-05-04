@@ -89,7 +89,7 @@ namespace PigService
                 }
                 states += $"'{it}'";
             });
-            var sql = $"select * from t_pig_more where AccountId='{accountId}' and Name = '{coin}' and BState in({states}) and (SOrderId<=0 or SOrderId is null) and UserName='{userName}'";
+            var sql = $"select * from t_pig_more where AccountId='{accountId}' and Name = '{coin}' and BState in({states}) and (SOrderId<=0 or SOrderId is null) and UserName='{userName}' order by BOrderP asc limit 0,5";
             logger.Error(sql);
             return Database.Query<PigMore>(sql).ToList();
         }

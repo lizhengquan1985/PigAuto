@@ -321,7 +321,7 @@ namespace PigRunService
 
                     var canSell = JudgeSellUtils.CheckCanSell(needSellPigMoreItem.BOrderP, higher, itemNowPrice, gaoyuPercentSell, needHuitou);
 
-                    logger.Error($"是否能够出售: {needSellPigMoreList.Count}, {accountId}, {userName}, {symbol.BaseCurrency}, {canSell}");
+                    logger.Error($"是否能够出售:  {symbol.BaseCurrency},{canSell}, price:{needSellPigMoreItem.BOrderP}, nowPrice:{nowPrice},itemNowPrice:{itemNowPrice}, {userName}, {needSellPigMoreList.Count}, {accountId}");
                     if (canSell)
                     {
                         decimal sellQuantity = needSellPigMoreItem.BQuantity * (decimal)0.99;
