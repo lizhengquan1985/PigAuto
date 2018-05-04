@@ -1,4 +1,5 @@
-﻿using MySql.Data.MySqlClient;
+﻿using log4net;
+using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
 using PigAccount;
 using PigPlatform.Model;
@@ -14,6 +15,8 @@ namespace PigService
 {
     public class PigMoreDao : BaseDao
     {
+        static ILog logger = LogManager.GetLogger(typeof(PigMoreDao));
+
         public PigMoreDao() : base()
         {
         }
@@ -48,7 +51,7 @@ namespace PigService
         public List<PigMore> ListNeedChangeSellStatePigMore()
         {
             var states = $"'{StateConst.PartialFilled}','{StateConst.Filled}'";
-            var sql = $"select * from t_pig_more where SState not in({states})";
+            var sql = $"select * from t_pig_more where SState not in({states}) and SOrderId>0";
             return Database.Query<PigMore>(sql).ToList();
         }
 
@@ -74,8 +77,9 @@ namespace PigService
 
         #endregion
 
-        public List<PigMore> ListPigMore(string accountId, string userName, string coin, List<string> stateList)
+        public List<PigMore> GetNeedSellPigMore(string accountId, string userName, string coin)
         {
+            List<string> stateList = new List<string>() { StateConst.PartialCanceled, StateConst.Filled };
             var states = "";
             stateList.ForEach(it =>
             {
@@ -85,8 +89,17 @@ namespace PigService
                 }
                 states += $"'{it}'";
             });
-            var sql = $"select * from t_pig_more where AccountId='{accountId}' and Name = '{coin}' and BState in({states}) and UserName='{userName}'";
+            var sql = $"select * from t_pig_more where AccountId='{accountId}' and Name = '{coin}' and BState in({states}) and (SOrderId<=0 or SOrderId is null) and UserName='{userName}'";
+            Console.WriteLine(sql);
+            logger.Error(sql);
             return Database.Query<PigMore>(sql).ToList();
+        }
+
+        public decimal GetMinPriceOfNotSell(string accountId, string userName, string coin)
+        {
+            var sql = $"select min(BTradeP) from t_pig_more where AccountId='{accountId}' and Name = '{coin}' and BState!='({StateConst.Canceled.ToString()})' and (SOrderId<=0 or SOrderId is null) and UserName='{userName}'";
+            logger.Error(sql);
+            return Database.Query<decimal>(sql).FirstOrDefault();
         }
 
         public void ChangeDataWhenSell(long id, decimal sellQuantity, decimal sellOrderPrice, string sellOrderResult, string sFlex, long sellOrderId)

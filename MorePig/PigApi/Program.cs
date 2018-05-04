@@ -44,6 +44,8 @@ namespace PigApi
             // 初始化
             CoinUtils.Init();
 
+            UserPools.Push("xx");
+
             // 初始化k线
             //KlineUtils.Begin();
 

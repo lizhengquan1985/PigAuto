@@ -27,6 +27,11 @@ namespace PigRunService
                 Data = data,
                 Date = DateTime.Now
             });
+            historyKlines[key] = new HistoryKlineData()
+            {
+                Data = data,
+                Date = DateTime.Now
+            };
         }
 
         public static HistoryKlineData Get(string key)

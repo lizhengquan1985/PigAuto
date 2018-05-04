@@ -43,10 +43,10 @@ namespace PigRunService
         {
             var key = HistoryKlinePools.GetKey(symbol, "1min");
             var historyKlineData = HistoryKlinePools.Get(key);
-            if (historyKlineData == null || historyKlineData.Data == null || historyKlineData.Data.Count == 0 || historyKlineData.Date < DateTime.Now.AddMinutes(-1))
+            if (historyKlineData == null || historyKlineData.Data == null || historyKlineData.Data.Count == 0 || historyKlineData.Date < DateTime.Now.AddMinutes(-1))// TODO
             {
                 Console.WriteLine($"RunBuy 数据还未准备好：{symbol.BaseCurrency}");
-                logger.Error($"RunBuy 数据还未准备好：{symbol.BaseCurrency}, {JsonConvert.SerializeObject(historyKlineData)}");
+                logger.Error($"RunBuy 数据还未准备好：{symbol.BaseCurrency}");
                 Thread.Sleep(1000 * 5);
                 return;
             }
@@ -90,7 +90,7 @@ namespace PigRunService
             }
 
             if (flexPointList[0].isHigh || JudgeBuyUtils.IsQuickRise(symbol.BaseCurrency, historyKlines)
-                || JudgeBuyUtils.CheckCalcMaxhuoluo(historyKlines))
+                )//|| JudgeBuyUtils.CheckCalcMaxhuoluo(historyKlines)
             {
                 // 最高点 不适合购入
                 // 快速升高 不适合购入
@@ -104,21 +104,25 @@ namespace PigRunService
                 AccountConfig accountConfig = AccountConfigUtils.GetAccountConfig(userName);
                 var accountId = accountConfig.MainAccountId;
 
-                var noSellList = new PigMoreDao().ListPigMore(accountId, userName, symbol.BaseCurrency, new List<string> { StateConst.PartialFilled, StateConst.Submitted, StateConst.Submitting, StateConst.PreSubmitted });
+                //var noSellList = new PigMoreDao().ListPigMore(accountId, userName, symbol.BaseCurrency, new List<string> { StateConst.PartialFilled, StateConst.Submitted, StateConst.Submitting, StateConst.PreSubmitted });
                 var canBuy = JudgeBuyUtils.CheckCanBuy(nowPrice, flexPointList[0].close);
                 if (!canBuy)
                 {
                     continue;
                 }
 
-                decimal minBuyPrice = 999999;
-                noSellList.ForEach(item =>
+                decimal minBuyPrice = new PigMoreDao().GetMinPriceOfNotSell(accountId, userName, symbol.BaseCurrency);
+                if(minBuyPrice <= 0)
                 {
-                    if (item.BOrderP < minBuyPrice)
-                    {
-                        minBuyPrice = item.BOrderP;
-                    }
-                });
+                    minBuyPrice = 999999;
+                }
+                //noSellList.ForEach(item =>
+                //{
+                //    if (item.BOrderP < minBuyPrice)
+                //    {
+                //        minBuyPrice = item.BOrderP;
+                //    }
+                //});
 
                 if (nowPrice * (decimal)1.03 > minBuyPrice)
                 {
@@ -157,7 +161,7 @@ namespace PigRunService
                 req.source = "api";
                 req.symbol = symbol.BaseCurrency + symbol.QuoteCurrency;
                 req.type = "buy-limit";
-                logger.Error($"开始下单, {JsonConvert.SerializeObject(req)}");
+                logger.Error($"开始下单, {JsonConvert.SerializeObject(req)}, 上一次最低购入价位：{minBuyPrice}, accountId：{accountId}");
                 HBResponse<long> order = api.OrderPlace(req);
                 logger.Error($"下单结果, {JsonConvert.SerializeObject(order)}");
                 if (order.Status == "ok")
@@ -228,10 +232,11 @@ namespace PigRunService
         {
             var key = HistoryKlinePools.GetKey(symbol, "1min");
             var historyKlineData = HistoryKlinePools.Get(key);
-            if (historyKlineData == null || historyKlineData.Data == null || historyKlineData.Data.Count == 0 || historyKlineData.Date < DateTime.Now.AddMinutes(-1))
+            if (historyKlineData == null || historyKlineData.Data == null || historyKlineData.Data.Count == 0 
+                || historyKlineData.Date < DateTime.Now.AddMinutes(-1))// TODO
             {
                 Console.WriteLine($"RunSell 数据还未准备好：{symbol.BaseCurrency}");
-                logger.Error($"RunSell 数据还未准备好：{symbol.BaseCurrency}, {JsonConvert.SerializeObject(historyKlineData)}");
+                logger.Error($"RunSell 数据还未准备好：{symbol.BaseCurrency}");
                 Thread.Sleep(1000 * 5);
                 return;
             }
@@ -278,6 +283,7 @@ namespace PigRunService
             if (!flexPointList[0].isHigh)
             {
                 // 最低点 不适合出售
+                Console.WriteLine($"最低点 不适合出售 {symbol.BaseCurrency}");
                 return;
             }
 
@@ -286,8 +292,9 @@ namespace PigRunService
             {
                 var accountConfig = AccountConfigUtils.GetAccountConfig(userName);
                 var accountId = accountConfig.MainAccountId;
-                var needSellPigMoreList = new PigMoreDao().ListPigMore(accountId, userName, symbol.QuoteCurrency, new List<string>() { StateConst.PartialCanceled, StateConst.Filled });
+                var needSellPigMoreList = new PigMoreDao().GetNeedSellPigMore(accountId, userName, symbol.QuoteCurrency);
 
+                Console.WriteLine($"可以出售的数量: {needSellPigMoreList.Count}, {accountId}, {userName}, {symbol.BaseCurrency}");
                 foreach (var needSellPigMoreItem in needSellPigMoreList)
                 {
                     // 分析是否 大于
@@ -324,10 +331,12 @@ namespace PigRunService
                         req.amount = sellQuantity.ToString();
                         req.price = sellPrice.ToString();
                         req.source = "api";
-                        req.symbol = "ethusdt";
+                        req.symbol = symbol.BaseCurrency + symbol.QuoteCurrency; ;
                         req.type = "sell-limit";
                         PlatformApi api = PlatformApi.GetInstance(userName);
+                        logger.Error($"开始下单出售, {JsonConvert.SerializeObject(req)}, sellPrice：{sellPrice}, accountId：{accountId}");
                         HBResponse<long> order = api.OrderPlace(req);
+                        logger.Error($"开始下单出售, {JsonConvert.SerializeObject(req)}, order.Data：{order.Data}, accountId：{accountId}");
                         if (order.Status == "ok")
                         {
                             new PigMoreDao().ChangeDataWhenSell(needSellPigMoreItem.Id, sellQuantity, sellPrice, JsonConvert.SerializeObject(order), JsonConvert.SerializeObject(flexPointList), order.Data);
@@ -369,6 +378,7 @@ namespace PigRunService
             try
             {
                 var needChangeBuyStatePigMoreList = new PigMoreDao().ListNeedChangeBuyStatePigMore();
+                //Console.WriteLine($"未改变状态的交易记录2：{needChangeBuyStatePigMoreList.Count}");
                 foreach (var item in needChangeBuyStatePigMoreList)
                 {
                     // 如果长时间没有购买成功， 则取消订单。
@@ -388,6 +398,7 @@ namespace PigRunService
             try
             {
                 var needChangeSellStatePigMoreList = new PigMoreDao().ListNeedChangeSellStatePigMore();
+                //Console.WriteLine($"未改变状态的交易记录1：{needChangeSellStatePigMoreList.Count}");
                 foreach (var item in needChangeSellStatePigMoreList)
                 {
                     // 如果长时间没有出售成功， 则取消订单。

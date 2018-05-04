@@ -62,6 +62,7 @@ namespace PigRunService.BeginUtils
         {
             try
             {
+                logger.Error($"InitOneKine --> {symbol.BaseCurrency}");
                 PlatformApi api = PlatformApi.GetInstance("xx"); // 下面api和角色无关. 随便指定一个xx
                 var period = "1min";
                 var klines = api.GetHistoryKline(symbol.BaseCurrency + symbol.QuoteCurrency, period);

@@ -1,4 +1,5 @@
-﻿using PigPlatform;
+﻿using log4net;
+using PigPlatform;
 using PigPlatform.Model;
 using System;
 using System.Collections.Generic;
@@ -11,37 +12,44 @@ namespace PigRunService.BeginUtils
 {
     public class BuyOrSellUtils
     {
+        static ILog logger = LogManager.GetLogger(typeof(BuyOrSellUtils));
+
         public static void Begin()
         {
             var symbols = CoinUtils.GetAllCommonSymbols();
-
-            foreach (var symbol in symbols)
-            {
-                if (symbol.BaseCurrency != "xrp" && symbol.BaseCurrency != "eos" && symbol.BaseCurrency != "elf")
-                {
-                    continue;
-                }
-                RunCoin(symbol);
-            }
+            RunCoin(symbols.Where(it => it.BaseCurrency == "eos" || it.BaseCurrency == "xrp" || it.BaseCurrency == "elf" || it.BaseCurrency == "btm").ToList());
+            //var splitIndex = 16;
+            //RunCoin(symbols.GetRange(0, splitIndex + 1));
+            //RunCoin(symbols.GetRange(splitIndex, symbols.Count - splitIndex));
         }
 
-        private static void RunCoin(CommonSymbols symbol)
+        private static void RunCoin(List<CommonSymbols> symbols)
         {
             Task.Run(() =>
             {
                 while (true)
                 {
-                    // 判断kline存不存在, 不存在读取一次.
-                    var key = HistoryKlinePools.GetKey(symbol, "1min");
-                    var historyKlineData = HistoryKlinePools.Get(key);
-                    if (historyKlineData == null || historyKlineData.Data == null || historyKlineData.Data.Count == 0 || historyKlineData.Date < DateTime.Now.AddSeconds(-10))
+                    foreach (var symbol in symbols)
                     {
-                        KlineUtils.InitOneKine(symbol);
+                        try
+                        {
+                            // 判断kline存不存在, 不存在读取一次.
+                            var key = HistoryKlinePools.GetKey(symbol, "1min");
+                            var historyKlineData = HistoryKlinePools.Get(key);
+                            if (historyKlineData == null || historyKlineData.Data == null || historyKlineData.Data.Count == 0 || historyKlineData.Date < DateTime.Now.AddSeconds(-10))
+                            {
+                                KlineUtils.InitOneKine(symbol);
+                            }
+
+                            CoinTrade.Run(symbol);
+
+                        }
+                        catch (Exception ex)
+                        {
+                            logger.Error("RunCoin:  " + ex.Message, ex);
+                        }
+                        Thread.Sleep(1000 * 5);
                     }
-
-                    CoinTrade.Run(symbol);
-
-                    Thread.Sleep(1000);
                 }
             });
         }
