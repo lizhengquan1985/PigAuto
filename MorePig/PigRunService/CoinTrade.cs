@@ -249,27 +249,27 @@ namespace PigRunService
             // 分析是否下跌， 下跌超过一定数据，可以考虑
             decimal flexPercent = (decimal)1.04;
             var flexPointList = CoinAnalyze.Analyze(historyKlines, out lastLowPrice, out nowPrice, flexPercent);
-            if (flexPointList == null || flexPointList.Count == 0 || (flexPointList.Count == 1 && flexPointList[0].isHigh))
+            if (flexPointList == null || flexPointList.Count == 0 || (flexPointList.Count == 1 && !flexPointList[0].isHigh))
             {
                 flexPercent = (decimal)1.035;
                 flexPointList = CoinAnalyze.Analyze(historyKlines, out lastLowPrice, out nowPrice, flexPercent);
             }
-            if (flexPointList == null || flexPointList.Count == 0 || (flexPointList.Count == 1 && flexPointList[0].isHigh))
+            if (flexPointList == null || flexPointList.Count == 0 || (flexPointList.Count == 1 && !flexPointList[0].isHigh))
             {
                 flexPercent = (decimal)1.03;
                 flexPointList = CoinAnalyze.Analyze(historyKlines, out lastLowPrice, out nowPrice, flexPercent);
             }
-            if (flexPointList == null || flexPointList.Count == 0 || (flexPointList.Count == 1 && flexPointList[0].isHigh))
+            if (flexPointList == null || flexPointList.Count == 0 || (flexPointList.Count == 1 && !flexPointList[0].isHigh))
             {
                 flexPercent = (decimal)1.025;
                 flexPointList = CoinAnalyze.Analyze(historyKlines, out lastLowPrice, out nowPrice, flexPercent);
             }
-            if (flexPointList == null || flexPointList.Count == 0 || (flexPointList.Count == 1 && flexPointList[0].isHigh))
+            if (flexPointList == null || flexPointList.Count == 0 || (flexPointList.Count == 1 && !flexPointList[0].isHigh))
             {
                 flexPercent = (decimal)1.02;
                 flexPointList = CoinAnalyze.Analyze(historyKlines, out lastLowPrice, out nowPrice, flexPercent);
             }
-            if (flexPointList == null || flexPointList.Count == 0 || (flexPointList.Count == 1 && flexPointList[0].isHigh))
+            if (flexPointList == null || flexPointList.Count == 0 || (flexPointList.Count == 1 && !flexPointList[0].isHigh))
             {
                 flexPercent = (decimal)1.015;
                 flexPointList = CoinAnalyze.Analyze(historyKlines, out lastLowPrice, out nowPrice, flexPercent);
@@ -284,6 +284,7 @@ namespace PigRunService
             {
                 // 最低点 不适合出售
                 Console.WriteLine($"最低点 不适合出售 {symbol.BaseCurrency}");
+                logger.Error($"{flexPercent},lastLowPrice:{lastLowPrice}, nowPrice:{nowPrice}, flexPointList:{JsonConvert.SerializeObject(flexPointList)}");
                 return;
             }
 
