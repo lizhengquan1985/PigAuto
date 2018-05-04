@@ -152,6 +152,10 @@ namespace PigRunService
                 decimal buyQuantity = recommendAmount / nowPrice;
 
                 buyQuantity = decimal.Round(buyQuantity, symbol.AmountPrecision);
+                if (symbol.BaseCurrency == "xrp" && buyQuantity <= 1)
+                {
+                    buyQuantity = (decimal)1.01;
+                }
                 decimal orderPrice = decimal.Round(nowPrice * (decimal)1.005, symbol.PricePrecision);
 
                 OrderPlaceRequest req = new OrderPlaceRequest();
@@ -284,7 +288,7 @@ namespace PigRunService
             {
                 // 最低点 不适合出售
                 Console.WriteLine($"最低点 不适合出售 {symbol.BaseCurrency}");
-                logger.Error($"{flexPercent},lastLowPrice:{lastLowPrice}, nowPrice:{nowPrice}, flexPointList:{JsonConvert.SerializeObject(flexPointList)}");
+                logger.Error($"最低点 不适合出售 {symbol.BaseCurrency}-{flexPercent},lastLowPrice:{lastLowPrice}, nowPrice:{nowPrice}, flexPointList:{JsonConvert.SerializeObject(flexPointList)}");
                 return;
             }
 
@@ -293,7 +297,7 @@ namespace PigRunService
             {
                 var accountConfig = AccountConfigUtils.GetAccountConfig(userName);
                 var accountId = accountConfig.MainAccountId;
-                var needSellPigMoreList = new PigMoreDao().GetNeedSellPigMore(accountId, userName, symbol.QuoteCurrency);
+                var needSellPigMoreList = new PigMoreDao().GetNeedSellPigMore(accountId, userName, symbol.BaseCurrency);
 
                 Console.WriteLine($"可以出售的数量: {needSellPigMoreList.Count}, {accountId}, {userName}, {symbol.BaseCurrency}");
                 foreach (var needSellPigMoreItem in needSellPigMoreList)
