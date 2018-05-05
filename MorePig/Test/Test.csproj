@@ -45,9 +45,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BuyRecordList.cs" />
     <Compile Include="PlatformTest.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SpotRecordList.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

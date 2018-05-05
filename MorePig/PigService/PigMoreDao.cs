@@ -110,5 +110,11 @@ namespace PigService
                 tx.Commit();
             }
         }
+
+        public PigMore GetByBOrderId(long orderId)
+        {
+            var sql = $"select * from t_pig_more where BOrderId={orderId}";
+            return Database.Query<PigMore>(sql).FirstOrDefault();
+        }
     }
 }
