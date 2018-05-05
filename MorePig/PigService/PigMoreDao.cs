@@ -69,7 +69,7 @@ namespace PigService
         {
             using (var tx = Database.BeginTransaction())
             {
-                var sql = $"update t_spot_record set STradeP={sellTradePrice}, SState='{orderDetail.Data.state}' ,SOrderDetail='{JsonConvert.SerializeObject(orderDetail)}', SOrderMatchResults='{JsonConvert.SerializeObject(orderMatchResult)}' where SOrderId ='{sellOrderId}'";
+                var sql = $"update t_pig_more set STradeP={sellTradePrice}, SState='{orderDetail.Data.state}' ,SOrderDetail='{JsonConvert.SerializeObject(orderDetail)}', SOrderMatchResults='{JsonConvert.SerializeObject(orderMatchResult)}' where SOrderId ='{sellOrderId}'";
                 Database.Execute(sql);
                 tx.Commit();
             }
