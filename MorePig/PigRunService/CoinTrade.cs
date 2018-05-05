@@ -133,7 +133,7 @@ namespace PigRunService
                 PlatformApi api = PlatformApi.GetInstance(userName);
                 var accountInfo = api.GetAccountBalance(accountId);
                 var usdt = accountInfo.Data.list.Find(it => it.currency == "usdt");
-                decimal recommendAmount = usdt.balance / 400; // TODO 测试阶段，暂定低一些，
+                decimal recommendAmount = usdt.balance / 200; // TODO 测试阶段，暂定低一些，
                 Console.WriteLine($"RunBuy--------> 开始 {symbol.BaseCurrency}  推荐额度：{decimal.Round(recommendAmount, 2)} ");
 
                 if (recommendAmount < (decimal)0.3)
