@@ -45,6 +45,7 @@ namespace PigApi
             CoinUtils.Init();
 
             UserPools.Push("xx");
+            UserPools.Push("qq");
 
             // 初始化k线
             //KlineUtils.Begin();

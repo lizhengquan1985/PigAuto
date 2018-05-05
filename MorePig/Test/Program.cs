@@ -17,7 +17,7 @@ namespace Test
     {
         static void Main(string[] args)
         {
-            var list = SpotRecordList.GetYXQ();
+            var list = TradeRecord.SpotLzqRecord();
             var i = "";
             foreach(var orderId in list)
             {

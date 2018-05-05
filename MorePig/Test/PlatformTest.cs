@@ -39,7 +39,7 @@ namespace Test
 
         public static void SearchOrder(long orderId)
         {
-            var userName = "xx";
+            var userName = "qq";
             AccountConfig account = AccountConfigUtils.GetAccountConfig(userName);
 
             PlatformApi api = PlatformApi.GetInstance(userName);

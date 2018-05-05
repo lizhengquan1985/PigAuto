@@ -31,6 +31,7 @@ namespace PigApi.Controller
                     sellCount++;
                 }
             });
+            return 1;
         }
     }
 }
