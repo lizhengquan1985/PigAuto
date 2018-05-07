@@ -16,11 +16,15 @@ namespace PigService
         {
         }
 
-        public async Task<List<PigMore>> ListTodayTrade()
+        public async Task<List<PigMore>> ListTodayTrade(string userName)
         {
             var smallDate = Utils.GetSmallestOfTheDate(DateTime.Now);
             var bigDate = Utils.GetBiggestOfTheDate(DateTime.Now);
             var sql = $"select * from t_pig_more where BDate>=@SmallDate or SDate>=@SmallDate";
+            if (!string.IsNullOrEmpty(userName))
+            {
+                sql += $" and UserName='{userName}'";
+            }
             return (await Database.QueryAsync<PigMore>(sql, new { SmallDate = smallDate })).ToList();
         }
     }

@@ -45,7 +45,6 @@ namespace PigRunService
             var historyKlineData = HistoryKlinePools.Get(key);
             if (historyKlineData == null || historyKlineData.Data == null || historyKlineData.Data.Count == 0 || historyKlineData.Date < DateTime.Now.AddMinutes(-1))// TODO
             {
-                Console.WriteLine($"RunBuy 数据还未准备好：{symbol.BaseCurrency}");
                 logger.Error($"RunBuy 数据还未准备好：{symbol.BaseCurrency}");
                 Thread.Sleep(1000 * 5);
                 return;
@@ -165,9 +164,7 @@ namespace PigRunService
                 req.source = "api";
                 req.symbol = symbol.BaseCurrency + symbol.QuoteCurrency;
                 req.type = "buy-limit";
-                logger.Error($"开始下单, {JsonConvert.SerializeObject(req)}, 上一次最低购入价位：{minBuyPrice}, accountId：{accountId}");
                 HBResponse<long> order = api.OrderPlace(req);
-                logger.Error($"下单结果, {JsonConvert.SerializeObject(order)}");
                 if (order.Status == "ok")
                 {
                     new PigMoreDao().CreatePigMore(new PigMore()
@@ -204,8 +201,8 @@ namespace PigRunService
                     // 下单成功马上去查一次
                     QueryBuyDetailAndUpdate(userName, order.Data);
                 }
-                logger.Error($"下单结果 coin{symbol.BaseCurrency} accountId:{accountId}  购买数量{buyQuantity} nowOpen{nowPrice} {JsonConvert.SerializeObject(order)}");
-                logger.Error($"下单结果 分析 {JsonConvert.SerializeObject(flexPointList)}");
+                logger.Error($"下单购买结果 {JsonConvert.SerializeObject(req)}, order：{JsonConvert.SerializeObject(order)}, 上一次最低购入价位：{minBuyPrice},nowPrice：{nowPrice}, accountId：{accountId}");
+                logger.Error($"下单购买结果 分析 {JsonConvert.SerializeObject(flexPointList)}");
             }
         }
 
@@ -239,7 +236,6 @@ namespace PigRunService
             if (historyKlineData == null || historyKlineData.Data == null || historyKlineData.Data.Count == 0 
                 || historyKlineData.Date < DateTime.Now.AddMinutes(-1))// TODO
             {
-                Console.WriteLine($"RunSell 数据还未准备好：{symbol.BaseCurrency}");
                 logger.Error($"RunSell 数据还未准备好：{symbol.BaseCurrency}");
                 Thread.Sleep(1000 * 5);
                 return;
@@ -287,7 +283,6 @@ namespace PigRunService
             if (!flexPointList[0].isHigh)
             {
                 // 最低点 不适合出售
-                Console.WriteLine($"最低点 不适合出售 {symbol.BaseCurrency}");
                 logger.Error($"最低点 不适合出售 {symbol.BaseCurrency}-{flexPercent},lastLowPrice:{lastLowPrice}, nowPrice:{nowPrice}, flexPointList:{JsonConvert.SerializeObject(flexPointList)}");
                 return;
             }
@@ -299,7 +294,6 @@ namespace PigRunService
                 var accountId = accountConfig.MainAccountId;
                 var needSellPigMoreList = new PigMoreDao().GetNeedSellPigMore(accountId, userName, symbol.BaseCurrency);
 
-                logger.Error($"可以出售的数量: {needSellPigMoreList.Count}, {accountId}, {userName}, {symbol.BaseCurrency}");
                 foreach (var needSellPigMoreItem in needSellPigMoreList)
                 {
                     // 分析是否 大于
@@ -340,9 +334,7 @@ namespace PigRunService
                         req.symbol = symbol.BaseCurrency + symbol.QuoteCurrency; ;
                         req.type = "sell-limit";
                         PlatformApi api = PlatformApi.GetInstance(userName);
-                        logger.Error($"开始下单出售, {JsonConvert.SerializeObject(req)}, sellPrice：{sellPrice}, accountId：{accountId}");
                         HBResponse<long> order = api.OrderPlace(req);
-                        logger.Error($"开始下单出售, {JsonConvert.SerializeObject(req)}, order.Data：{order.Data}, accountId：{accountId}");
                         if (order.Status == "ok")
                         {
                             new PigMoreDao().ChangeDataWhenSell(needSellPigMoreItem.Id, sellQuantity, sellPrice, JsonConvert.SerializeObject(order), JsonConvert.SerializeObject(flexPointList), order.Data);
@@ -350,9 +342,8 @@ namespace PigRunService
                             QuerySellDetailAndUpdate(userName, order.Data);
                         }
 
-                        logger.Error($"出售结果 coin{symbol.QuoteCurrency} accountId:{accountId}  出售数量{sellQuantity} itemNowOpen{itemNowPrice} higher{higher} {JsonConvert.SerializeObject(order)}");
-                        logger.Error($"出售结果 分析 {JsonConvert.SerializeObject(flexPointList)}");
-
+                        logger.Error($"下单出售结果 {JsonConvert.SerializeObject(req)}, order：{JsonConvert.SerializeObject(order)},itemNowPrice：{itemNowPrice} higher：{higher}，accountId：{accountId}");
+                        logger.Error($"下单出售结果 分析 {JsonConvert.SerializeObject(flexPointList)}");
                     }
                 }
             }

@@ -90,14 +90,12 @@ namespace PigService
                 states += $"'{it}'";
             });
             var sql = $"select * from t_pig_more where AccountId='{accountId}' and Name = '{coin}' and BState in({states}) and (SOrderId<=0 or SOrderId is null) and UserName='{userName}' order by BOrderP asc limit 0,5";
-            logger.Error(sql);
             return Database.Query<PigMore>(sql).ToList();
         }
 
         public decimal GetMinPriceOfNotSell(string accountId, string userName, string coin)
         {
             var sql = $"select case when min(BTradeP) is null then 99999 else min(BTRADEP) END from t_pig_more where AccountId='{accountId}' and Name = '{coin}' and BState!='({StateConst.Canceled.ToString()})' and (SOrderId<=0 or SOrderId is null) and UserName='{userName}'";
-            logger.Error(sql);
             return Database.Query<decimal>(sql).FirstOrDefault();
         }
 
