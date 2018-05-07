@@ -1,4 +1,5 @@
-﻿using PigApi.DTO;
+﻿using log4net;
+using PigApi.DTO;
 using PigService;
 using System;
 using System.Collections.Generic;
@@ -11,46 +12,67 @@ namespace PigApi.Controller
 {
     public class DayController : ApiController
     {
+        static ILog logger = LogManager.GetLogger(typeof(DayController));
+
         public PigMoreStatisticsDao PigMoreStatisticsDao { get; set; }
 
         /// <summary>
         /// 今日交易， 购买数量，出售数量， 购买总额，出售总额，每条记录（）。
         /// </summary>
         /// <returns></returns>
+        [HttpGet]
+        [ActionName("listTodayTrade")]
         public async Task<object> ListTodayTrade(string userName)
         {
-            var pigMoreList = await PigMoreStatisticsDao.ListTodayTrade(userName);
-
-            var buyCount = 0;
-            var sellCount = 0;
-            var buyAmount = (decimal)0.0;
-            var sellAmount = (decimal)0.0;
-            var sellEarnings = (decimal)0.0;
-            var list = new List<TodayTradeDTO>();
-            pigMoreList.ForEach(it =>
+            try
             {
-                if (it.BDate >= Utils.GetSmallestOfTheDate(DateTime.Now))
+                var pigMoreList = await new PigMoreStatisticsDao().ListTodayTrade(userName);
+
+                var buyCount = 0;
+                var sellCount = 0;
+                var buyAmount = (decimal)0.0;
+                var sellAmount = (decimal)0.0;
+                var sellEarnings = (decimal)0.0;
+                var list = new List<TodayTradeDTO>();
+                pigMoreList.ForEach(it =>
                 {
-                    buyCount++;
-                    buyAmount += it.BQuantity * it.BTradeP;
-                }
-                if (it.SOrderId > 0)
-                {
-                    sellCount++;
-                    sellAmount += it.SQuantity * it.STradeP;
-                    sellEarnings += it.SQuantity * it.STradeP - it.BQuantity * it.BTradeP;
-                }
-                list.Add(new TodayTradeDTO() {
-                    Name = it.Name,
-                    BDate = it.BDate,
-                    BQuantity = it.BQuantity,
-                    BTradeP = it.BTradeP,
-                    SQuantity = it.SQuantity,
-                    SDate = it.SDate,
-                    STradeP = it.STradeP,
+                    if (it.BDate >= Utils.GetSmallestOfTheDate(DateTime.Now))
+                    {
+                        buyCount++;
+                        buyAmount += it.BQuantity * it.BTradeP;
+                    }
+                    if (it.SOrderId > 0)
+                    {
+                        sellCount++;
+                        sellAmount += it.SQuantity * it.STradeP;
+                        sellEarnings += it.SQuantity * it.STradeP - it.BQuantity * it.BTradeP;
+                    }
+                    list.Add(new TodayTradeDTO()
+                    {
+                        Name = it.Name,
+                        BDate = it.BDate,
+                        BQuantity = it.BQuantity,
+                        BTradeP = it.BTradeP,
+                        SQuantity = it.SQuantity,
+                        SDate = it.SDate,
+                        STradeP = it.STradeP,
+                    });
                 });
-            });
-            return 1;
+                return new
+                {
+                    buyCount,
+                    sellCount,
+                    buyAmount,
+                    sellAmount,
+                    sellEarnings,
+                    list
+                };
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex.Message, ex);
+                return ex.Message;
+            }
         }
     }
 }

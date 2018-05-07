@@ -25,10 +25,10 @@ namespace PigApi
             options.Urls.Add("http://127.0.0.1:6666");
             options.Urls.Add(string.Format("http://{0}:6666", Environment.MachineName));
             options.Urls.Add("http://+:6666");
-            options.Urls.Add("http://localhost:90");
-            options.Urls.Add("http://127.0.0.1:90");
-            options.Urls.Add(string.Format("http://{0}:90", Environment.MachineName));
-            options.Urls.Add("http://+:90");
+            options.Urls.Add("http://localhost:80");
+            options.Urls.Add("http://127.0.0.1:80");
+            options.Urls.Add(string.Format("http://{0}:80", Environment.MachineName));
+            options.Urls.Add("http://+:80");
             WebApp.Start<Startup>(options);
 
             BeginTrade();

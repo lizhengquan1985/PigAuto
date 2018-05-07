@@ -1,6 +1,7 @@
 ﻿using log4net;
 using PigPlatform;
 using PigPlatform.Model;
+using PigService;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -67,11 +68,21 @@ namespace PigRunService.BeginUtils
                 var klines = api.GetHistoryKline(symbol.BaseCurrency + symbol.QuoteCurrency, period);
                 var key = HistoryKlinePools.GetKey(symbol, period);
                 HistoryKlinePools.Init(key, klines);
+
+                // 记录到数据库
+                Record(symbol.BaseCurrency, klines[0]);
             }
             catch (Exception ex)
             {
                 logger.Error("InitOneKine --> " + ex.Message, ex);
             }
+        }
+
+        public static void Record(string coin, HistoryKline line)
+        {
+            var dao = new KlineDao();
+            dao.CheckTable(coin);
+            dao.Record(coin, line);
         }
     }
 }
