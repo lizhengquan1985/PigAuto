@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BeginUtils\TradeStateUtils.cs" />
+    <Compile Include="BuyLimitUtils.cs" />
     <Compile Include="CoinAnalyze.cs" />
     <Compile Include="CoinTrade.cs" />
     <Compile Include="FlexPoint.cs" />
