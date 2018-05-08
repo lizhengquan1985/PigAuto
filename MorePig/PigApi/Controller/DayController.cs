@@ -74,5 +74,18 @@ namespace PigApi.Controller
                 return ex.Message;
             }
         }
+
+        [HttpGet]
+        [ActionName("kline")]
+        public async Task<object> kline(string userName, string name, DateTime date)
+        {
+            var begin = date.AddMinutes(-60 * 24);
+            var end = date.AddMinutes(10);
+
+            var buyList = await new PigMoreStatisticsDao().ListBuy(userName, name, begin, end);
+            var sellList = await new PigMoreStatisticsDao().ListSell(userName, name, begin, end);
+            var klineList = new KlineDao().ListKline(name, begin, end);
+            return new { buyList, sellList, klineList };
+        }
     }
 }

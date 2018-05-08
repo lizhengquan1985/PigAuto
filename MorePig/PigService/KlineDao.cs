@@ -33,17 +33,23 @@ namespace PigService
             }
         }
 
-        public void Record(string coin, HistoryKline line)
+        public void Record(string name, HistoryKline line)
         {
             try
             {
-                var sql = $"insert into t_coin_{coin}(Id, Open, Close, Low, High, Vol, Count, CreateTime) values({line.Id},{line.Open},{line.Close},{line.Low},{line.High},{line.Vol},{line.Count}, now())";
+                var sql = $"insert into t_coin_{name}(Id, Open, Close, Low, High, Vol, Count, CreateTime) values({line.Id},{line.Open},{line.Close},{line.Low},{line.High},{line.Vol},{line.Count}, now())";
                 Database.Execute(sql);
             }
             catch (Exception ex)
             {
 
             }
+        }
+
+        public List<HistoryKline> ListKline(string name, DateTime begin, DateTime end)
+        {
+            var sql = $"select * from t_coin_{name} where CreateTime>=@Begin and CreateTime<=@End";
+            return Database.Query<HistoryKline>(sql).ToList(); ;
         }
     }
 }

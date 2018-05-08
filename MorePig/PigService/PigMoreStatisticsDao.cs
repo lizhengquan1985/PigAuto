@@ -28,5 +28,21 @@ namespace PigService
             sql += " order by OrderDate desc";
             return (await Database.QueryAsync<PigMore>(sql, new { SmallDate = smallDate })).ToList();
         }
+
+        public async Task<List<PigMore>> ListBuy(string userName, string name, DateTime begin, DateTime end)
+        {
+            var smallDate = Utils.GetSmallestOfTheDate(DateTime.Now);
+            var bigDate = Utils.GetBiggestOfTheDate(DateTime.Now);
+            var sql = $"select * from t_pig_more where UserName=@UserName and Name=@Name and BDate>=@BeginDate or BDate<=@EndDate";
+            return (await Database.QueryAsync<PigMore>(sql, new { UserName = userName, Name = name, BeginDate = begin, EndDate = end })).ToList();
+        }
+
+        public async Task<List<PigMore>> ListSell(string userName, string name, DateTime begin, DateTime end)
+        {
+            var smallDate = Utils.GetSmallestOfTheDate(DateTime.Now);
+            var bigDate = Utils.GetBiggestOfTheDate(DateTime.Now);
+            var sql = $"select * from t_pig_more where UserName=@UserName and Name=@Name and SDate>=@BeginDate or SDate<=@EndDate";
+            return (await Database.QueryAsync<PigMore>(sql, new { UserName = userName, Name = name, BeginDate = begin, EndDate = end })).ToList();
+        }
     }
 }
