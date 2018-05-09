@@ -55,7 +55,7 @@ namespace PigService
         {
             var smallDate = Utils.GetSmallestOfTheDate(DateTime.Now);
             var bigDate = Utils.GetBiggestOfTheDate(DateTime.Now);
-            var sql = $"select * from t_pig_more where UserName=@UserName and Name=@Name and SDate>=@BeginDate and SDate<=@EndDate";
+            var sql = $"select * from t_pig_more where UserName=@UserName and SState='{StateConst.Filled}' and Name=@Name and SDate>=@BeginDate and SDate<=@EndDate";
             return (await Database.QueryAsync<PigMore>(sql, new { UserName = userName, Name = name, BeginDate = begin, EndDate = end })).ToList();
         }
     }
