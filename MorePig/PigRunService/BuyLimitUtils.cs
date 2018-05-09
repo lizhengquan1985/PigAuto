@@ -14,8 +14,8 @@ namespace PigRunService
         {
             recordList.Add(new BuyRecord() { UserName = userName, Name = name, BuyDate = DateTime.Now });
 
-            var count = recordList.Count(it => it.Name == name && it.UserName == userName && it.BuyDate > DateTime.Now.AddHours(1));
-            return count > 4;
+            var count = recordList.Count(it => it.Name == name && it.UserName == userName && it.BuyDate > DateTime.Now.AddHours(2));
+            return count > 6;
         }
     }
 

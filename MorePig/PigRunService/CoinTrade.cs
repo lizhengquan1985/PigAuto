@@ -111,7 +111,7 @@ namespace PigRunService
                 }
 
                 decimal minBuyPrice = new PigMoreDao().GetMinPriceOfNotSell(accountId, userName, symbol.BaseCurrency);
-                if(minBuyPrice <= 0)
+                if (minBuyPrice <= 0)
                 {
                     minBuyPrice = 999999;
                 }
@@ -164,6 +164,12 @@ namespace PigRunService
                 req.source = "api";
                 req.symbol = symbol.BaseCurrency + symbol.QuoteCurrency;
                 req.type = "buy-limit";
+                if (BuyLimitUtils.Record(userName, symbol.BaseCurrency))
+                {
+                    Console.WriteLine("两个小时内购买次数太多，暂停一会");
+                    Thread.Sleep(1000 * 5);
+                    return;
+                }
                 HBResponse<long> order = api.OrderPlace(req);
                 if (order.Status == "ok")
                 {
@@ -233,7 +239,7 @@ namespace PigRunService
         {
             var key = HistoryKlinePools.GetKey(symbol, "1min");
             var historyKlineData = HistoryKlinePools.Get(key);
-            if (historyKlineData == null || historyKlineData.Data == null || historyKlineData.Data.Count == 0 
+            if (historyKlineData == null || historyKlineData.Data == null || historyKlineData.Data.Count == 0
                 || historyKlineData.Date < DateTime.Now.AddMinutes(-1))// TODO
             {
                 logger.Error($"RunSell 数据还未准备好：{symbol.BaseCurrency}");
