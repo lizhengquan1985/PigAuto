@@ -20,7 +20,7 @@ namespace PigService
         {
             var smallDate = Utils.GetSmallestOfTheDate(DateTime.Now);
             var bigDate = Utils.GetBiggestOfTheDate(DateTime.Now);
-            var sql = $"select *, case when SState='{StateConst.Filled}' then SDate else BDate end OrderDate from t_pig_more where BDate>=@SmallDate or SDate>=@SmallDate";
+            var sql = $"select *, case when SState='{StateConst.Filled}' then SDate else BDate end OrderDate from t_pig_more where (BDate>=@SmallDate or SDate>=@SmallDate)";
             if (!string.IsNullOrEmpty(userName))
             {
                 sql += $" and UserName='{userName}'";
