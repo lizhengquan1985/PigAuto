@@ -37,8 +37,8 @@ namespace PigService
             {
                 where = $" where UserName='{userName}'";
             }
-            var sql = $"select * from (select DATE_FORMAT(BDate,'%Y %m %d') BDate, count(1) BCount, sum(BQuantity*BTradeP) BAmount from t_pig_more {where} group by DATE_FORMAT(BDate,'%Y %m %d')) b "
-                + $"join(select DATE_FORMAT(SDate, '%Y %m %d') SDate, count(1) SCount, sum(SQuantity * STradeP) SAmount, sum(SQuantity * STradeP - BQuantity * BTradeP) Earning from t_pig_more {where} group by DATE_FORMAT(SDate, '%Y %m %d')) s"
+            var sql = $"select * from (select DATE_FORMAT(BDate,'%Y-%m-%d') BDate, count(1) BCount, sum(BQuantity*BTradeP) BAmount from t_pig_more {where} group by DATE_FORMAT(BDate,'%Y-%m-%d')) b "
+                + $"join(select DATE_FORMAT(SDate, '%Y-%m-%d') SDate, count(1) SCount, sum(SQuantity * STradeP) SAmount, sum(SQuantity * STradeP - BQuantity * BTradeP) Earning from t_pig_more {where} group by DATE_FORMAT(SDate, '%Y-%m-%d')) s"
                 + " on b.BDate = s.SDate order by b.BDate DESC";
             return (await Database.QueryAsync<PigMoreStatisticsDay>(sql)).ToList();
         }
@@ -47,7 +47,7 @@ namespace PigService
         {
             var smallDate = Utils.GetSmallestOfTheDate(DateTime.Now);
             var bigDate = Utils.GetBiggestOfTheDate(DateTime.Now);
-            var sql = $"select * from t_pig_more where UserName=@UserName and Name=@Name and BDate>=@BeginDate or BDate<=@EndDate";
+            var sql = $"select * from t_pig_more where UserName=@UserName and Name=@Name and BDate>=@BeginDate and BDate<=@EndDate";
             return (await Database.QueryAsync<PigMore>(sql, new { UserName = userName, Name = name, BeginDate = begin, EndDate = end })).ToList();
         }
 
@@ -55,7 +55,7 @@ namespace PigService
         {
             var smallDate = Utils.GetSmallestOfTheDate(DateTime.Now);
             var bigDate = Utils.GetBiggestOfTheDate(DateTime.Now);
-            var sql = $"select * from t_pig_more where UserName=@UserName and Name=@Name and SDate>=@BeginDate or SDate<=@EndDate";
+            var sql = $"select * from t_pig_more where UserName=@UserName and Name=@Name and SDate>=@BeginDate and SDate<=@EndDate";
             return (await Database.QueryAsync<PigMore>(sql, new { UserName = userName, Name = name, BeginDate = begin, EndDate = end })).ToList();
         }
     }

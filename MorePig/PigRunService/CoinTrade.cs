@@ -166,7 +166,9 @@ namespace PigRunService
                 req.type = "buy-limit";
                 if (BuyLimitUtils.Record(userName, symbol.BaseCurrency))
                 {
-                    Console.WriteLine("两个小时内购买次数太多，暂停一会");
+                    logger.Error(" --------------------- 两个小时内购买次数太多，暂停一会 --------------------- ");
+                    logger.Error(" --------------------- 两个小时内购买次数太多，暂停一会 --------------------- ");
+                    logger.Error(" --------------------- 两个小时内购买次数太多，暂停一会 --------------------- ");
                     Thread.Sleep(1000 * 5);
                     return;
                 }
