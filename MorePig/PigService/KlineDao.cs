@@ -10,6 +10,9 @@ namespace PigService
 {
     public class KlineDao : BaseDao
     {
+        public KlineDao() : base()
+        {
+        }
         public void CheckTable(string coin)
         {
             try
@@ -49,7 +52,7 @@ namespace PigService
         public List<HistoryKline> ListKline(string name, DateTime begin, DateTime end)
         {
             var sql = $"select * from t_coin_{name} where CreateTime>=@Begin and CreateTime<=@End";
-            return Database.Query<HistoryKline>(sql).ToList(); ;
+            return Database.Query<HistoryKline>(sql, new { Begin = begin, End = end }).ToList(); ;
         }
     }
 }

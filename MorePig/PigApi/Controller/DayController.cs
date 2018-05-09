@@ -76,16 +76,43 @@ namespace PigApi.Controller
         }
 
         [HttpGet]
+        [ActionName("listPigMoreStatisticsDay")]
+        public async Task<object> ListPigMoreStatisticsDay(string userName)
+        {
+            try
+            {
+                return await new PigMoreStatisticsDao().Statistics(userName);
+            }
+            catch(Exception ex)
+            {
+                return null;
+            }
+        }
+
+        [HttpGet]
         [ActionName("kline")]
         public async Task<object> kline(string userName, string name, DateTime date)
         {
-            var begin = date.AddMinutes(-60 * 24);
-            var end = date.AddMinutes(10);
+            try
+            {
+                var begin = date.AddMinutes(-60 * 24);
+                var end = date.AddMinutes(10);
 
-            var buyList = await new PigMoreStatisticsDao().ListBuy(userName, name, begin, end);
-            var sellList = await new PigMoreStatisticsDao().ListSell(userName, name, begin, end);
-            var klineList = new KlineDao().ListKline(name, begin, end);
-            return new { buyList, sellList, klineList };
+                var buyList = await new PigMoreStatisticsDao().ListBuy(userName, name, begin, end);
+                var sellList = await new PigMoreStatisticsDao().ListSell(userName, name, begin, end);
+                var klineList = new KlineDao().ListKline(name, begin, end);
+                return new
+                {
+                    buyList = buyList.Select(it => new { it.BDate, it.BTradeP }),
+                    sellList = sellList.Select(it => new { it.SDate, it.STradeP }),
+                    klineList = klineList.Select(it => new { it.Close, it.Id, it.High })
+                };
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex.Message, ex);
+                return null;
+            }
         }
     }
 }
