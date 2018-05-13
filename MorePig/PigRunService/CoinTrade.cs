@@ -128,7 +128,7 @@ namespace PigRunService
                 //    }
                 //});
 
-                if (nowPrice * (decimal)1.03 > minBuyPrice)
+                if (nowPrice * (decimal)1.035 > minBuyPrice)
                 {
                     // 最近一次购入,没有低于3%
                     continue;
@@ -318,7 +318,7 @@ namespace PigRunService
                     decimal itemNowPrice = 0;
                     decimal higher = JudgeSellUtils.AnalyzeNeedSell(needSellPigMoreItem.BOrderP, needSellPigMoreItem.BDate, symbol.BaseCurrency, symbol.QuoteCurrency, out itemNowPrice, historyKlines);
 
-                    decimal gaoyuPercentSell = (decimal)1.035;
+                    decimal gaoyuPercentSell = (decimal)1.045;
 
                     bool needHuitou = true;// 如果很久没有出售过,则要考虑不需要回头
                     if (flexPercent < (decimal)1.04)
