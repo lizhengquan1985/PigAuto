@@ -55,8 +55,13 @@ namespace PigRunService
             decimal lastLowPrice;
             decimal nowPrice;
             // 分析是否下跌， 下跌超过一定数据，可以考虑
-            decimal flexPercent = (decimal)1.04;
+            decimal flexPercent = (decimal)1.045;
             var flexPointList = CoinAnalyze.Analyze(historyKlines, out lastLowPrice, out nowPrice, flexPercent);
+            if (flexPointList == null || flexPointList.Count == 0 || (flexPointList.Count == 1 && flexPointList[0].isHigh))
+            {
+                flexPercent = (decimal)1.040;
+                flexPointList = CoinAnalyze.Analyze(historyKlines, out lastLowPrice, out nowPrice, flexPercent);
+            }
             if (flexPointList == null || flexPointList.Count == 0 || (flexPointList.Count == 1 && flexPointList[0].isHigh))
             {
                 flexPercent = (decimal)1.035;
@@ -255,8 +260,13 @@ namespace PigRunService
             decimal lastLowPrice;
             decimal nowPrice;
             // 分析是否下跌， 下跌超过一定数据，可以考虑
-            decimal flexPercent = (decimal)1.04;
+            decimal flexPercent = (decimal)1.045;
             var flexPointList = CoinAnalyze.Analyze(historyKlines, out lastLowPrice, out nowPrice, flexPercent);
+            if (flexPointList == null || flexPointList.Count == 0 || (flexPointList.Count == 1 && !flexPointList[0].isHigh))
+            {
+                flexPercent = (decimal)1.040;
+                flexPointList = CoinAnalyze.Analyze(historyKlines, out lastLowPrice, out nowPrice, flexPercent);
+            }
             if (flexPointList == null || flexPointList.Count == 0 || (flexPointList.Count == 1 && !flexPointList[0].isHigh))
             {
                 flexPercent = (decimal)1.035;
