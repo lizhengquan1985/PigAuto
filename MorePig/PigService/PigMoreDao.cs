@@ -95,8 +95,21 @@ namespace PigService
 
         public decimal GetMinPriceOfNotSell(string accountId, string userName, string coin)
         {
-            var sql = $"select case when min(BTradeP) is null then 99999 else min(BTRADEP) END from t_pig_more where AccountId='{accountId}' and Name = '{coin}' and BState!='({StateConst.Canceled.ToString()})' and (SOrderId<=0 or SOrderId is null) and UserName='{userName}'";
-            return Database.Query<decimal>(sql).FirstOrDefault();
+            var sql = $"select * from t_pig_more where AccountId='{accountId}' and Name = '{coin}' and BState!='({StateConst.Canceled.ToString()})' and (SOrderId<=0 or SOrderId is null) and UserName='{userName}'";
+            var list = Database.Query<PigMore>(sql).ToList();
+            var minPrice = (decimal)999999;
+            foreach(var item in list)
+            {
+                if(item.BTradeP > 0 && item.BTradeP < minPrice)
+                {
+                    minPrice = item.BTradeP;
+                }
+                if (item.BTradeP <= 0 && item.BOrderP < minPrice)
+                {
+                    minPrice = item.BOrderP;
+                }
+            }
+            return minPrice;
         }
 
         public void ChangeDataWhenSell(long id, decimal sellQuantity, decimal sellOrderPrice, string sellOrderResult, string sFlex, long sellOrderId)
